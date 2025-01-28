@@ -13,6 +13,8 @@ import { useNavigation, useRouter } from "expo-router";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../../configs/FirebaseConfig";
 // import { signInWithEmailAndPassword } from "firebase/auth";
 // import { auth } from "../../../configs/FirebaseConfig";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -41,7 +43,7 @@ export default function SignIn() {
       .then((userCredential) => {
         // Signed in
         const user = userCredential.user;
-        router.replace("/tabs/mytrip");
+        // router.replace("/tabs/mytrip");
         console.log(user);
         // ...
       })
@@ -98,7 +100,7 @@ export default function SignIn() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => router.replace("auth/SignUp")}
+                onPress={() => router.replace("auth/signUp")}
                 style={styles.createAccountButton}
               >
                 <Text style={styles.createAccountButtonText}>
