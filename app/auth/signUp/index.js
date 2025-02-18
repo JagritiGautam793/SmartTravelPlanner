@@ -16,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { createUserWithEmailAndPassword } from "firebase/auth"; // Ensure this import is present
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { auth } from "../../../configs/FirebaseConfig";
+import Toast from "react-native-toast-message";
 
 const { width, height } = Dimensions.get("window");
 
@@ -34,10 +35,14 @@ export default function SignUp() {
 
   const onCreateAccount = () => {
     if (!email || !password || !fullName) {
-      ToastAndroid.show(
-        "Please enter your complete credentials",
-        ToastAndroid.BOTTOM
-      );
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please enter your complete credentials",
+        style: styles.toastError,
+        textStyle: styles.toastText,
+      });
+
       return;
     }
 
@@ -46,7 +51,7 @@ export default function SignUp() {
         // Signed up
         const user = userCredential.user;
         console.log(user);
-        // router.replace("/tabs/mytrip");
+        router.replace("/tabs/mytrip");
         // Navigate to the next screen or show success message
       })
       .catch((error) => {
@@ -63,6 +68,7 @@ export default function SignUp() {
       }}
       style={styles.backgroundImage}
     >
+      <Toast />
       <SafeAreaView style={styles.container}>
         <BlurView intensity={10} tint="light" style={styles.blurContainer}>
           <LinearGradient
@@ -201,5 +207,14 @@ const styles = StyleSheet.create({
     color: "#333333",
     fontSize: 18,
     fontWeight: "600",
+  },
+  toastError: {
+    backgroundColor: "black", // Set background to black
+    padding: 10,
+    borderRadius: 10,
+  },
+  toastText: {
+    color: "white", // Set text color to white
+    fontSize: 16,
   },
 });
