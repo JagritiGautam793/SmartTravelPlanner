@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { CreateTripContext } from "../context/CreateTripContextt";
+import { CreateTripContext } from "../context/CreateTripContext";
 import { useState } from "react";
 
 export default function RootLayout() {
