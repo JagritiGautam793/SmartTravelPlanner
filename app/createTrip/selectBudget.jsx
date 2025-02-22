@@ -1,18 +1,24 @@
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  ToastAndroid,
+} from "react-native";
 import React, { useContext, useEffect, useState } from "react";
-import { Link, useNavigation } from "expo-router";
-import { selectTravellerList } from "../constants/Option";
+import { Link, useNavigation, useRouter } from "expo-router";
+import { selectBudgetOptions } from "../constants/Option";
+import optionCard from "../../components/createTripComp/optionCard";
 import { CreateTripContext } from "../../context/CreateTripContext";
-import { useRoute } from "@react-navigation/native";
+export default function selectBudget() {
+  const navigation = useNavigation();
 
-export default function selectTraveller() {
-  const naviagtion = useNavigation();
-  const [selectedTraveller, setSelectedTraveller] = useState();
+  const [selectedOption, setSelectedOption] = useState();
   const { tripData, setTripData } = useContext(CreateTripContext);
-  // const router=useRoute
+  const router = useRouter();
 
   useEffect(() => {
-    naviagtion.setOptions({
+    navigation.setOptions({
       headerShown: true,
       headerTransparent: true,
       headerTitle: "",
@@ -20,30 +26,39 @@ export default function selectTraveller() {
   }, []);
 
   useEffect(() => {
-    setTripData({ ...tripData, traveller: selectedTraveller });
-  }, [selectedTraveller]);
+    selectedOption &&
+      setTripData({
+        ...tripData,
+        budget: selectedOption?.title,
+      });
+  }, [selectedOption]);
 
-  useEffect(() => {
-    console.log(tripData);
-  }, [tripData]);
+  const onClickContinue = () => {
+    if (!selectedOption) {
+      ToastAndroid.show("Select your budget", ToastAndroid.LONG);
+      return;
+    }
+
+    router.push("");
+  };
 
   return (
     <View
       style={{
-        padding: 25,
         paddingTop: 75,
+        padding: 25,
         backgroundColor: "white",
         height: "100%",
       }}
     >
       <Text
         style={{
-          fontSize: 35,
           fontWeight: "bold",
+          fontSize: 35,
           marginTop: 20,
         }}
       >
-        Who's JOining
+        Budget
       </Text>
       <View
         style={{
@@ -56,28 +71,26 @@ export default function selectTraveller() {
             fontSize: 20,
           }}
         >
-          Choose your Travellers
+          Choose spending money for your trips
         </Text>
 
         <FlatList
-          data={selectTravellerList}
+          data={selectBudgetOptions}
           renderItem={({ item, index }) => (
             <TouchableOpacity
-              onPress={() => setSelectedTraveller(item)}
+              onPress={() => setSelectedOption(item)}
               style={{
                 marginVertical: 10,
               }}
             >
-              <optionCard option={item} selectedOption={selectedTraveller} />
+              <optionCard option={item} selectedOption={selectedOption} />
             </TouchableOpacity>
           )}
         />
       </View>
 
-      {/* instead of on press on touchable opacity i used link href in order to navigate  */}
-
       <TouchableOpacity
-        // onPress={}
+        onPress={() => onClickContinue()}
         style={{
           padding: 15,
           backgroundColor: "white",
@@ -85,23 +98,15 @@ export default function selectTraveller() {
           marginTop: 20,
         }}
       >
-        <Link
+        <Text
           style={{
-            width: "100%",
             textAlign: "center",
+            color: "white",
+            fontSize: 20,
           }}
-          href={"/createTrip/selectDates"}
         >
-          <Text
-            style={{
-              textAlign: "center",
-              color: "white",
-              fontSize: 20,
-            }}
-          >
-            Continue
-          </Text>
-        </Link>
+          Continue
+        </Text>
       </TouchableOpacity>
     </View>
   );
