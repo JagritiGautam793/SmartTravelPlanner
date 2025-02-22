@@ -1,13 +1,15 @@
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigation } from "expo-router";
+import { Link, useNavigation } from "expo-router";
 import { selectTravellerList } from "../constants/Option";
 import { CreateTripContext } from "../../context/CreateTripContext";
+import { useRoute } from "@react-navigation/native";
 
 export default function selectTraveller() {
   const naviagtion = useNavigation();
   const [selectedTraveller, setSelectedTraveller] = useState();
   const { tripData, setTripData } = useContext(CreateTripContext);
+  // const router=useRoute
 
   useEffect(() => {
     naviagtion.setOptions({
@@ -72,7 +74,10 @@ export default function selectTraveller() {
         />
       </View>
 
+      {/* instead of on press on touchable opacity i used link href in order to navigate  */}
+
       <TouchableOpacity
+        // onPress={}
         style={{
           padding: 15,
           backgroundColor: "white",
@@ -80,15 +85,23 @@ export default function selectTraveller() {
           marginTop: 20,
         }}
       >
-        <Text
+        <Link
           style={{
+            width: "100%",
             textAlign: "center",
-            color: "white",
-            fontSize: 20,
           }}
+          href={"/createTrip/selectDates"}
         >
-          Continue
-        </Text>
+          <Text
+            style={{
+              textAlign: "center",
+              color: "white",
+              fontSize: 20,
+            }}
+          >
+            Continue
+          </Text>
+        </Link>
       </TouchableOpacity>
     </View>
   );
