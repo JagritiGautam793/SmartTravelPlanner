@@ -1,10 +1,13 @@
-import { View, Text, FlatList } from "react-native";
-import React, { useEffect } from "react";
+import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigation } from "expo-router";
 import { selectTravellerList } from "../constants/Option";
+import { CreateTripContext } from "../../context/CreateTripContext";
 
 export default function selectTraveller() {
   const naviagtion = useNavigation();
+  const [selectedTraveller, setSelectedTraveller] = useState();
+  const { tripData, setTripData } = useContext(CreateTripContext);
 
   useEffect(() => {
     naviagtion.setOptions({
@@ -12,7 +15,16 @@ export default function selectTraveller() {
       headerTransparent: true,
       headerTitle: "",
     });
-  });
+  }, []);
+
+  useEffect(() => {
+    setTripData({ ...tripData, traveller: selectedTraveller });
+  }, [selectedTraveller]);
+
+  useEffect(() => {
+    console.log(tripData);
+  }, [tripData]);
+
   return (
     <View
       style={{
@@ -48,16 +60,36 @@ export default function selectTraveller() {
         <FlatList
           data={selectTravellerList}
           renderItem={({ item, index }) => (
-            <View
+            <TouchableOpacity
+              onPress={() => setSelectedTraveller(item)}
               style={{
                 marginVertical: 10,
               }}
             >
-              <optionCard option={item} />
-            </View>
+              <optionCard option={item} selectedTraveller={selectedTraveller} />
+            </TouchableOpacity>
           )}
         />
       </View>
+
+      <TouchableOpacity
+        style={{
+          padding: 15,
+          backgroundColor: "white",
+          borderRadius: 15,
+          marginTop: 20,
+        }}
+      >
+        <Text
+          style={{
+            textAlign: "center",
+            color: "white",
+            fontSize: 20,
+          }}
+        >
+          Continue
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
