@@ -39,7 +39,7 @@ export default function selectBudget() {
       return;
     }
 
-    router.push("");
+    router.push("/createTrip/reviewTrip");
   };
 
   return (
