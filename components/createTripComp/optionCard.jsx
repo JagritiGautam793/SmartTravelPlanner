@@ -1,7 +1,7 @@
 import { View, Text } from "react-native";
 import React from "react";
 
-export default function optionCard({ option, selectedOption }) {
+export default function OptionCard({ option, selectedOption }) {
   return (
     <View
       style={[
@@ -19,7 +19,7 @@ export default function optionCard({ option, selectedOption }) {
       <View>
         <Text
           style={{
-            fontSize: 20,
+            fontSize: 10,
             fontWeight: "bold",
           }}
         >
@@ -27,7 +27,7 @@ export default function optionCard({ option, selectedOption }) {
         </Text>
         <Text
           style={{
-            fontSize: 17,
+            fontSize: 10,
             // fontWeight: "bold",
             color: "gray",
           }}
@@ -37,7 +37,7 @@ export default function optionCard({ option, selectedOption }) {
       </View>
       <Text
         style={{
-          fontSize: 30,
+          fontSize: 10,
         }}
       >
         {option.icon}

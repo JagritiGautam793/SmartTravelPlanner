@@ -4,6 +4,7 @@ import { Link, useNavigation } from "expo-router";
 import { selectTravellerList } from "../constants/Option";
 import { CreateTripContext } from "../../context/CreateTripContext";
 import { useRoute } from "@react-navigation/native";
+import OptionCard from "../../components/createTripComp/optionCard";
 
 export default function selectTraveller() {
   const naviagtion = useNavigation();
@@ -31,7 +32,7 @@ export default function selectTraveller() {
     <View
       style={{
         padding: 25,
-        paddingTop: 75,
+        paddingTop: 25,
         backgroundColor: "white",
         height: "100%",
       }}
@@ -40,7 +41,7 @@ export default function selectTraveller() {
         style={{
           fontSize: 35,
           fontWeight: "bold",
-          marginTop: 20,
+          marginTop: 5,
         }}
       >
         Who's JOining
@@ -65,10 +66,10 @@ export default function selectTraveller() {
             <TouchableOpacity
               onPress={() => setSelectedTraveller(item)}
               style={{
-                marginVertical: 10,
+                marginVertical: 5,
               }}
             >
-              <optionCard option={item} selectedOption={selectedTraveller} />
+              <OptionCard option={item} selectedOption={selectedTraveller} />
             </TouchableOpacity>
           )}
         />
@@ -80,7 +81,7 @@ export default function selectTraveller() {
         // onPress={}
         style={{
           padding: 15,
-          backgroundColor: "white",
+          backgroundColor: "black",
           borderRadius: 15,
           marginTop: 20,
         }}
@@ -90,7 +91,7 @@ export default function selectTraveller() {
             width: "100%",
             textAlign: "center",
           }}
-          href={"/createTrip/selectDates"}
+          href={"/createTrip/selectDate"}
         >
           <Text
             style={{
