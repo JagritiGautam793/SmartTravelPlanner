@@ -1,10 +1,40 @@
 import { View, Text } from "react-native";
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import LottieView from "lottie-react-native";
 import { CreateTripContext } from "../../context/CreateTripContext";
+import { AI_PROMPT } from "../constants/Option";
+import { chatSession } from "../../configs/GemAi";
+import { useRouter } from "expo-router";
 
 export default function GenerateTrip() {
   const { tripData, setTripData } = useContext(CreateTripContext);
+  const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    tripData && GeneratePrompt();
+  }, [tripData]);
+  const GeneratePrompt = async () => {
+    setLoading(true);
+    const prompt_final = AI_PROMPT.replace(
+      "{location}",
+      tripData?.locationInfo?.name
+    )
+      .replace("{totalDays}", tripData?.totalNoOfDays)
+      .replace("{totalNight}", tripData?.totalNoOfDays - 1)
+      .replace("{traveller}", tripData?.traveller?.title)
+      .replace("{budget}", tripData?.budget)
+      .replace("{totalDays}", tripData?.totalNoOfDays)
+      .replace("{totalNight}", tripData?.totalNoOfDays - 1);
+
+    console.log(prompt_final);
+    // const result = await chatSession.sendMessage(prompt_final);
+    // console.log(result.response.text());
+    setLoading(false);
+
+    router.push("tabs/mytrip");
+  };
   return (
     <View
       style={{
