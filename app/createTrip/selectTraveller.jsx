@@ -4,7 +4,7 @@ import { Link, useNavigation } from "expo-router";
 import { selectTravellerList } from "../constants/Option";
 import { CreateTripContext } from "../../context/CreateTripContext";
 import { useRoute } from "@react-navigation/native";
-import OptionCard from "../../components/createTripComp/optionCard";
+import OptionCard from "../../components/createTripComp/OptionCard";
 
 export default function selectTraveller() {
   const naviagtion = useNavigation();

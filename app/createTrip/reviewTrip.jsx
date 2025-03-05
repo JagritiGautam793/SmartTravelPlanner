@@ -153,7 +153,7 @@ export default function reviewTrip() {
         //   onPress={() => onClickContinue()}
         style={{
           padding: 15,
-          backgroundColor: "white",
+          backgroundColor: "black",
           borderRadius: 15,
           marginTop: 80,
         }}

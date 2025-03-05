@@ -90,7 +90,7 @@ export default function selectDate() {
         onPress={onDateContinue}
         style={{
           padding: 15,
-          backgroundColor: "white",
+          backgroundColor: "black",
           borderRadius: 15,
           marginTop: 20,
         }}

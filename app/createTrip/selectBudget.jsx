@@ -8,8 +8,8 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigation, useRouter } from "expo-router";
 import { selectBudgetOptions } from "../constants/Option";
-import optionCard from "../../components/createTripComp/optionCard";
 import { CreateTripContext } from "../../context/CreateTripContext";
+import OptionCard from "../../components/createTripComp/OptionCard";
 export default function selectBudget() {
   const navigation = useNavigation();
 
@@ -83,7 +83,7 @@ export default function selectBudget() {
                 marginVertical: 10,
               }}
             >
-              <optionCard option={item} selectedOption={selectedOption} />
+              <OptionCard option={item} selectedOption={selectedOption} />
             </TouchableOpacity>
           )}
         />
@@ -93,7 +93,7 @@ export default function selectBudget() {
         onPress={() => onClickContinue()}
         style={{
           padding: 15,
-          backgroundColor: "white",
+          backgroundColor: "black",
           borderRadius: 15,
           marginTop: 20,
         }}
