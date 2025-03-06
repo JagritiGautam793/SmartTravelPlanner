@@ -5,12 +5,15 @@ import { CreateTripContext } from "../../context/CreateTripContext";
 import { AI_PROMPT } from "../constants/Option";
 import { chatSession } from "../../configs/GemAi";
 import { useRouter } from "expo-router";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../../configs/FirebaseConfig";
 
 export default function GenerateTrip() {
   const { tripData, setTripData } = useContext(CreateTripContext);
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
+  const user = auth.currentUser;
 
   useEffect(() => {
     tripData && GeneratePrompt();
@@ -29,9 +32,15 @@ export default function GenerateTrip() {
       .replace("{totalNight}", tripData?.totalNoOfDays - 1);
 
     console.log(prompt_final);
-    // const result = await chatSession.sendMessage(prompt_final);
-    // console.log(result.response.text());
+    const result = await chatSession.sendMessage(prompt_final);
+    console.log(result.response.text());
+    const tripResp = JSON.parse(result.response.text());
     setLoading(false);
+    const docId = Date.now().toString();
+    const resultf = await setDoc(doc(db, "UserTrips", docId), {
+      userEmail: user.email,
+      tripData: tripResp,
+    });
 
     router.push("tabs/mytrip");
   };
