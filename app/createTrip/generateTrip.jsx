@@ -39,7 +39,8 @@ export default function GenerateTrip() {
     const docId = Date.now().toString();
     const resultf = await setDoc(doc(db, "UserTrips", docId), {
       userEmail: user.email,
-      tripData: tripResp,
+      tripPlan: tripResp,
+      tripData: JSON.stringify(tripData),
     });
 
     router.push("tabs/mytrip");
