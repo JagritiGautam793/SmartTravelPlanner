@@ -16,8 +16,8 @@ export default function GenerateTrip() {
   const user = auth.currentUser;
 
   useEffect(() => {
-    tripData && GeneratePrompt();
-  }, [tripData]);
+    GeneratePrompt();
+  }, []);
   const GeneratePrompt = async () => {
     setLoading(true);
     const prompt_final = AI_PROMPT.replace(
