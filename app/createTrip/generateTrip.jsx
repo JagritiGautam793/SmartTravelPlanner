@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import LottieView from "lottie-react-native";
 import { CreateTripContext } from "../../context/CreateTripContext";
 import { AI_PROMPT } from "../constants/Option";
-import { chatSession } from "../../configs/GemAi";
+import { chatSession } from "../../configs/GenAi";
 import { useRouter } from "expo-router";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../../configs/FirebaseConfig";

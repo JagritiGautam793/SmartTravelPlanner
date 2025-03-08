@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator } from "react-native";
+import { View, Text, ActivityIndicator, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import NewTripCard from "../../components/userTrips/NewTripCard";
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -32,7 +32,7 @@ export default function MyTrip() {
   };
 
   return (
-    <View
+    <ScrollView
       style={{
         padding: 85,
         paddingTop: 35,
@@ -54,7 +54,11 @@ export default function MyTrip() {
 
       {loading && <ActivityIndicator size={"large"} />}
 
-      {userTrips?.length == 0 ? <NewTripCard /> : <UserTripList />}
-    </View>
+      {userTrips?.length == 0 ? (
+        <NewTripCard />
+      ) : (
+        <UserTripList userTrips={userTrips} />
+      )}
+    </ScrollView>
   );
 }
