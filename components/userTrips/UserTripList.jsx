@@ -3,6 +3,8 @@ import React from "react";
 import moment from "moment";
 import UserTripCard from "./UserTripCard";
 import { ObjectFlags } from "typescript";
+import { useRoute } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 
 export default function UserTripList({ userTrips }) {
   if (!userTrips || userTrips.length === 0) {
@@ -14,6 +16,7 @@ export default function UserTripList({ userTrips }) {
   }
 
   const LatestTrip = JSON.parse(userTrips[0]?.tripData || "{}");
+  const router = useRouter();
 
   return (
     userTrips && (
@@ -81,6 +84,14 @@ export default function UserTripList({ userTrips }) {
           </Text>
         </View>
         <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: "/trip-details",
+              params: {
+                trip: userTrips[0],
+              },
+            })
+          }
           style={{
             backgroundColor: "black",
             padding: 15,
