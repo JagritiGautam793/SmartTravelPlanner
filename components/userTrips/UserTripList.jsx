@@ -86,9 +86,9 @@ export default function UserTripList({ userTrips }) {
         <TouchableOpacity
           onPress={() =>
             router.push({
-              pathname: "/trip-details",
+              pathname: "/tripDetails",
               params: {
-                trip: userTrips[0],
+                trip: JSON.stringify(userTrips[0]),
               },
             })
           }
