@@ -2,6 +2,7 @@ import { View, Text, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import moment from "moment";
+import FlightsInfo from "../../components/UserTripDetails/FlightsInfo";
 
 export default function TripDetails() {
   const navigation = useNavigation();
@@ -122,12 +123,14 @@ export default function TripDetails() {
           >
             {formatData(tripDetails.tripData).traveller.title}
           </Text>
+
+          {/* Flights Info */}
+          <FlightsInfo flightData={tripDetails?.tripPlan?.flightDetails} />
+
+          {/* Hotel List */}
+
+          {/* Trip Planner Info */}
         </View>
-        {/* Flights INfo */}
-
-        {/* Hotel List */}
-
-        {/* Trip Planner Info */}
       </View>
     )
   );
