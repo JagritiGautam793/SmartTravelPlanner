@@ -94,6 +94,7 @@ export default function TripDetails() {
               style={{
                 fontSize: 14,
                 color: "gray",
+                marginTop: 5,
               }}
             >
               {moment(formatData(tripDetails.tripData).startDate).format(
@@ -113,7 +114,20 @@ export default function TripDetails() {
               )}
             </Text>
           </View>
+          <Text
+            style={{
+              fontSize: 17,
+              color: "gray",
+            }}
+          >
+            {formatData(tripDetails.tripData).traveller.title}
+          </Text>
         </View>
+        {/* Flights INfo */}
+
+        {/* Hotel List */}
+
+        {/* Trip Planner Info */}
       </View>
     )
   );
