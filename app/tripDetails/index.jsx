@@ -1,8 +1,9 @@
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import moment from "moment";
 import FlightsInfo from "../../components/UserTripDetails/FlightsInfo";
+import HotelInfo from "../../components/UserTripDetails/HotelInfo";
 
 export default function TripDetails() {
   const navigation = useNavigation();
@@ -40,7 +41,7 @@ export default function TripDetails() {
 
   return (
     tripDetails && (
-      <View>
+      <ScrollView>
         {parsedTripData?.locationInfo?.photoRef ? (
           <Image
             source={{
@@ -129,9 +130,11 @@ export default function TripDetails() {
 
           {/* Hotel List */}
 
+          <HotelInfo hotelData={tripDetails?.tripPlan?.hotelOptions} />
+
           {/* Trip Planner Info */}
         </View>
-      </View>
+      </ScrollView>
     )
   );
 }
