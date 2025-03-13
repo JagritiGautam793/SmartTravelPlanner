@@ -4,6 +4,7 @@ import { useLocalSearchParams, useNavigation } from "expo-router";
 import moment from "moment";
 import FlightsInfo from "../../components/UserTripDetails/FlightsInfo";
 import HotelInfo from "../../components/UserTripDetails/HotelInfo";
+import PlanTrip from "../../components/UserTripDetails/PlanTrip";
 
 export default function TripDetails() {
   const navigation = useNavigation();
@@ -133,6 +134,7 @@ export default function TripDetails() {
           <HotelInfo hotelData={tripDetails?.tripPlan?.hotelOptions} />
 
           {/* Trip Planner Info */}
+          <PlanTrip planTrip={tripDetails?.tripPlan} />
         </View>
       </ScrollView>
     )
