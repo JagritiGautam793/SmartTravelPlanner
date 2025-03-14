@@ -33,18 +33,23 @@ export default function selectDate() {
   };
 
   const onDateContinue = () => {
-    if (!startDate && !endDate) {
-      ToastAndroid.show("Please select Start and End Date", ToastAndroid.LONG);
+    if (!startDate) {
+      ToastAndroid.show("Please select a Start Date", ToastAndroid.LONG);
+      return;
     }
-    const totalNoOfDays = endDate.diff(startDate, "days");
-    console.log(totalNoOfDays + 1);
+
+    // If endDate is null, assume it's a single-day trip
+    const calculatedEndDate = endDate || startDate;
+    const totalNoOfDays = moment(calculatedEndDate).diff(startDate, "days") + 1;
+
+    console.log("Total Days:", totalNoOfDays);
+
     setTripData({
       ...tripData,
       startDate: startDate,
-      endDate: endDate,
-      totalNoOfDays: totalNoOfDays + 1,
+      endDate: calculatedEndDate, // If no end date, assume the start date as end date
+      totalNoOfDays: totalNoOfDays,
     });
-    // n night n+1 days
 
     router.push("/createTrip/selectBudget");
   };

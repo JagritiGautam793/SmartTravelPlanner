@@ -25,7 +25,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="discover"
         options={{
-          tabBarLabel: "My Trip",
+          tabBarLabel: "Discover",
           tabBarLabelStyle: { color: "black" },
           tabBarIcon: () => (
             <FontAwesome name="globe" size={24} color="black" />
@@ -35,7 +35,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          tabBarLabel: "My Trip",
+          tabBarLabel: "Profile",
           tabBarLabelStyle: { color: "black" },
           tabBarIcon: () => <Ionicons name="people" size={24} color="black" />,
         }}

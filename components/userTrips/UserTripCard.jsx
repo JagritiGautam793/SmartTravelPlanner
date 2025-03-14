@@ -60,5 +60,4 @@ export default function UserTripCard({ trip }) {
       </View>
     </View>
   );
-  s;
 }

@@ -15,7 +15,18 @@ export default function UserTripList({ userTrips }) {
     );
   }
 
-  const LatestTrip = JSON.parse(userTrips[0]?.tripData || "{}");
+  const sortedTrips = [...userTrips].sort((a, b) => {
+    // Handle Firestore timestamps
+    const timeA = a.createdAt?.toDate?.() || a.createdAt;
+    const timeB = b.createdAt?.toDate?.() || b.createdAt;
+
+    // If timestamps are valid dates, compare them
+    if (timeA instanceof Date && timeB instanceof Date) {
+      return timeB.getTime() - timeA.getTime();
+    }
+  });
+
+  const LatestTrip = JSON.parse(sortedTrips[0]?.tripData || "{}");
   const router = useRouter();
 
   return (

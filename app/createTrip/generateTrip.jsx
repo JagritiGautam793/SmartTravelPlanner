@@ -5,7 +5,7 @@ import { CreateTripContext } from "../../context/CreateTripContext";
 import { AI_PROMPT } from "../constants/Option";
 import { chatSession } from "../../configs/GenAi";
 import { useRouter } from "expo-router";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, db } from "../../configs/FirebaseConfig";
 
 export default function GenerateTrip() {
@@ -41,6 +41,7 @@ export default function GenerateTrip() {
       userEmail: user.email,
       tripPlan: tripResp,
       tripData: JSON.stringify(tripData),
+      createdAt: serverTimestamp(),
     });
 
     router.push("tabs/mytrip");
