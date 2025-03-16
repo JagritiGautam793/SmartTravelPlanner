@@ -1,12 +1,15 @@
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import { GetPhotoRef } from "../../services/GooglePlacesApi";
+import { useRouter } from "expo-router";
 
 export default function PlaceCard({ place }) {
   const [photoRef, setPhotoRef] = useState(null);
   useEffect(() => {
     GetGooglePhotoRef();
   }, []);
+
+  const router = useRouter();
 
   // Define the function outside useEffect
   const GetGooglePhotoRef = async () => {
@@ -54,6 +57,14 @@ export default function PlaceCard({ place }) {
 
         {/* Centered Button */}
         <TouchableOpacity
+          onPress={() => {
+            router.push({
+              pathname: "./tripDetails/LocalInfor",
+              params: {
+                place: JSON.stringify(place),
+              },
+            });
+          }}
           style={{
             backgroundColor: "gray",
             paddingVertical: 8,
