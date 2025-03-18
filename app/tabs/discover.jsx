@@ -1,10 +1,211 @@
-import { View, Text } from "react-native";
-import React from "react";
+import { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { fetchGooglePlaces } from "./../../configs/fetchPlaces";
+import { getPersonalizedRecommendations } from "./../../configs/geminiReco";
+import Recomm from "../../components/UserTripDetails/Recomm";
+import FetchUserTrips from "../../components/UserTripDetails/FetchUserTrip";
 
-export default function Discover() {
+const categories = [
+  { id: 1, name: "Beach", image: "https://source.unsplash.com/800x600/?beach" },
+  {
+    id: 2,
+    name: "Mountain",
+    image: "https://source.unsplash.com/800x600/?mountain",
+  },
+  { id: 3, name: "Camp", image: "https://source.unsplash.com/800x600/?camp" },
+];
+
+export default function DiscoverScreen() {
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [places, setPlaces] = useState([]);
+  const [aiRecommendations, setAIRecommendations] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Function to fetch data when category is selected
+  async function handleCategorySelect(category) {
+    console.log("🟢 Selected category:", category);
+    setSelectedCategory(category);
+    setLoading(true);
+
+    try {
+      console.log("🔍 Fetching Google Places...");
+      const googlePlaces = await fetchGooglePlaces(category);
+      console.log("✅ Places received:", googlePlaces.length);
+
+      setPlaces(googlePlaces);
+    } catch (error) {
+      console.error("❌ Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Function to render AI recommendations section
+  const renderAIRecommendations = () => {
+    return (
+      <View style={styles.aiRecommendationsSection}>
+        <Text style={styles.sectionTitle}>Working to generate your trip</Text>
+        <Text style={styles.sectionTitle}>Personalized For You</Text>
+
+        {aiRecommendations.map((recommendation, index) => (
+          <View key={index} style={styles.recommendationCard}>
+            <Text style={styles.recommendationName}>{recommendation.name}</Text>
+            <Text style={styles.recommendationDesc}>
+              {recommendation.description}
+            </Text>
+            <Text style={styles.recommendationReason}>
+              {recommendation.reason}
+            </Text>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
   return (
-    <View>
-      <Text>Discover</Text>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Discover Places</Text>
+        </View>
+        <View>
+          <Recomm />
+        </View>
+
+        {/* Categories */}
+        <View style={styles.categoriesSection}>
+          <Text style={styles.sectionTitle}>Categories</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.categoriesContainer}
+          >
+            {categories.map((category) => (
+              <TouchableOpacity
+                key={category.id}
+                style={[
+                  styles.categoryCard,
+                  selectedCategory === category.name && styles.selectedCategory,
+                ]}
+                onPress={() => handleCategorySelect(category.name)}
+              >
+                <Image
+                  source={{ uri: category.image }}
+                  style={styles.categoryImage}
+                />
+                <Text style={styles.categoryName}>{category.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Loading Indicator */}
+        {loading && (
+          <ActivityIndicator
+            size="large"
+            color="#FF6B6B"
+            style={{ marginTop: 20 }}
+          />
+        )}
+
+        {/* Display Places from Google API */}
+        <View style={styles.placesSection}>
+          <Text style={styles.sectionTitle}>Popular Places</Text>
+          {places.length === 0 && !loading ? (
+            <Text style={styles.emptyText}>
+              Select a category to see places.
+            </Text>
+          ) : (
+            places.map((place) => (
+              <View key={place.id} style={styles.placeCard}>
+                {place.image && (
+                  <Image
+                    source={{ uri: place.image }}
+                    style={styles.placeImage}
+                  />
+                )}
+                <View style={styles.placeInfo}>
+                  <Text style={styles.placeName}>{place.name}</Text>
+                  <Text style={styles.placeAddress}>{place.address}</Text>
+                  <Text style={styles.placeRating}>⭐ {place.rating}</Text>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
+
+        {/* AI Recommendations Section */}
+        {renderAIRecommendations()}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#fff" },
+  header: { padding: 20 },
+  title: { fontSize: 28, fontWeight: "bold", color: "#1A1A1A" },
+  categoriesSection: { marginTop: 20, paddingHorizontal: 20 },
+  sectionTitle: { fontSize: 20, fontWeight: "600", marginBottom: 10 },
+  categoriesContainer: { flexDirection: "row" },
+  categoryCard: { alignItems: "center", marginRight: 15 },
+  selectedCategory: { borderBottomWidth: 2, borderBottomColor: "#FF6B6B" },
+  categoryImage: { width: 80, height: 80, borderRadius: 40, marginBottom: 5 },
+  categoryName: { fontSize: 14, fontWeight: "500" },
+  placesSection: { marginTop: 30, paddingHorizontal: 20 },
+  placeCard: {
+    flexDirection: "row",
+    backgroundColor: "#F5F5F5",
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+  },
+  placeImage: { width: 80, height: 80, borderRadius: 10 },
+  placeInfo: { marginLeft: 10 },
+  placeName: { fontSize: 16, fontWeight: "600" },
+  placeAddress: { fontSize: 14, color: "#666" },
+  placeRating: { fontSize: 14, color: "#FF6B6B" },
+  emptyText: {
+    fontSize: 14,
+    color: "#888",
+    textAlign: "center",
+    marginTop: 10,
+  },
+  aiRecommendationsSection: {
+    marginTop: 30,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  recommendationCard: {
+    backgroundColor: "#F0F8FF",
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: "#4682B4",
+  },
+  recommendationName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  recommendationDesc: {
+    fontSize: 14,
+    marginBottom: 5,
+    color: "#333",
+  },
+  recommendationReason: {
+    fontSize: 13,
+    fontStyle: "italic",
+    color: "#666",
+  },
+});

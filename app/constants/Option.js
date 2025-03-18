@@ -50,6 +50,9 @@ export const selectBudgetOptions = [
   },
 ];
 
+// export const RECOMMENDATION_AI_PROMPT =
+//   "Generate personalized travel recommendations for a user based on their profile data:\n\nUser's Past Trips: Paris at Eiffel Tower, Rome at Colosseum\nUser's Past Searches: Eiffel Tower, Colosseum\nUser's Selected Categories of Interest: Adventure, Nature\nUser's Budget Range: $1000 - $3000\nUser's Preferred Trip Duration: 7-10 days\n\nBased on this data, recommend 3-5 destinations that this user would likely enjoy. For each recommendation, include:\n\n1. Destination name and brief overview\n2. Why this destination is recommended (connections to past trips and searches)\n3. Best time to visit based on their preferences\n4. Estimated budget range for this destination\n5. Top 3 activities or attractions they would likely enjoy based on their profile\n6. Suggested trip duration\n7. A specific accommodation recommendation that matches their past preferences\n8. A compelling image description or URL for this destination\n\nThe recommendations should prioritize:\n- Similar destinations to ones they've visited or searched for\n- Destinations that strongly match their selected categories\n- Options that fit within their budget range\n- A mix of popular and lesser-known destinations that match their apparent travel style\n\nThe output should be in JSON format with each recommendation as a separate object in an array.";
+
 export const AI_PROMPT =
   "Generate a Travel Plan for Location: {location} for {totalDays} Days and {totalNights} Nights " +
   "for {traveller} with a {budget} budget. The plan should include:\n\n" +
