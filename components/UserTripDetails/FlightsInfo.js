@@ -16,61 +16,79 @@ export default function FlightsInfo({ flightData }) {
   const totalPrice = arrivalPrice + departurePrice + transferPrice;
 
   return (
-    <View style={styles.container}>
-      <View
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+    <View style={styles.card}>
+      {/* Total Price Section */}
+      <View style={styles.header}>
         <Text style={styles.priceText}>
           Flight Total: <Text style={styles.priceAmount}>${totalPrice}</Text>
         </Text>
-        <TouchableOpacity
-          style={{
-            backgroundColor: "black",
-            padding: 5,
-            width: 100,
-            borderRadius: 7,
-          }}
-        >
-          <Text
-            style={{
-              textAlign: "center",
-              color: "white",
-              borderRadius: 7,
-            }}
-          >
-            Book Here
-          </Text>
+        <TouchableOpacity style={styles.bookButton}>
+          <Text style={styles.bookButtonText}>Book Here</Text>
         </TouchableOpacity>
       </View>
 
-      <Text>Airline (Arrival Flight):{arrivalFlight}</Text>
-      <Text>Airline (Departure Flight):{departureFlight}</Text>
+      {/* Flight Details */}
+      <View style={styles.flightDetails}>
+        <Text style={styles.detailText}>
+          ✈ <Text style={styles.boldText}>Arrival Flight:</Text> {arrivalFlight}
+        </Text>
+        <Text style={styles.detailText}>
+          🛫 <Text style={styles.boldText}>Departure Flight:</Text>{" "}
+          {departureFlight}
+        </Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  card: {
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
     marginVertical: 20,
-    // padding: 8,
-    // borderWidth: 1,
-    // borderColor: "gray",
-    padding: 10,
-    backgroundColor: "#f0f8ff",
-    // borderRadius: 8,
-    // alignSelf: "flex-start",
+    marginHorizontal: 10,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
   },
   priceText: {
-    fontSize: 16,
-    fontWeight: "500",
+    fontSize: 18,
+    fontWeight: "600",
   },
   priceAmount: {
     fontWeight: "bold",
-    color: "#2ecc71",
+    color: "#27ae60",
+  },
+  bookButton: {
+    backgroundColor: "#3498db",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+  },
+  bookButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  flightDetails: {
+    marginTop: 10,
+  },
+  detailText: {
+    fontSize: 16,
+    color: "#555",
+    marginVertical: 5,
+  },
+  boldText: {
+    fontWeight: "bold",
+    color: "#333",
   },
 });

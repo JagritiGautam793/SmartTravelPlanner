@@ -6,13 +6,14 @@ export default function HotelInfo({ hotelData }) {
   return (
     <View
       style={{
-        marginTop: -20,
+        marginTop: 20,
       }}
     >
       <Text
         style={{
           fontFamily: "bold",
-          fontSize: 15,
+          fontSize: 30,
+          marginTop: 10,
         }}
       >
         Hotel Recommendation

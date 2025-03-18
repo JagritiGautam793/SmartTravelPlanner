@@ -12,13 +12,15 @@ const nearByPlace = () =>
       API_KEY
   );
 
-const placeDetail = () => {
-  axios.get(
-    BASE_URL +
-      "fields=name%2Crating%2Cformatted_phone_number&place_id=ChIJN1t_tDeuEmsRUsoyG83frY4" +
-      "&key=" +
-      API_KEY
-  );
+const placeDetail = async (placeId) => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/details/json?place_id=${placeId}&key=${API_KEY}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching place details:", error);
+  }
 };
 
 export default {
