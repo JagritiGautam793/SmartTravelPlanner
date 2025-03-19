@@ -13,16 +13,7 @@ import { fetchGooglePlaces } from "./../../configs/fetchPlaces";
 import { getPersonalizedRecommendations } from "./../../configs/geminiReco";
 import Recomm from "../../components/UserTripDetails/Recomm";
 import FetchUserTrips from "../../components/UserTripDetails/FetchUserTrip";
-
-const categories = [
-  { id: 1, name: "Beach", image: "https://source.unsplash.com/800x600/?beach" },
-  {
-    id: 2,
-    name: "Mountain",
-    image: "https://source.unsplash.com/800x600/?mountain",
-  },
-  { id: 3, name: "Camp", image: "https://source.unsplash.com/800x600/?camp" },
-];
+import CategoriesRe from "../../components/UserTripDetails/CategoriesRe"; // ✅ Import CategoriesRe
 
 export default function DiscoverScreen() {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -74,38 +65,22 @@ export default function DiscoverScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header Section */}
         <View style={styles.header}>
           <Text style={styles.title}>Discover Places</Text>
         </View>
+
+        {/* Render Recomm component */}
         <View>
           <Recomm />
         </View>
 
-        {/* Categories */}
-        <View style={styles.categoriesSection}>
-          <Text style={styles.sectionTitle}>Categories</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.categoriesContainer}
-          >
-            {categories.map((category) => (
-              <TouchableOpacity
-                key={category.id}
-                style={[
-                  styles.categoryCard,
-                  selectedCategory === category.name && styles.selectedCategory,
-                ]}
-                onPress={() => handleCategorySelect(category.name)}
-              >
-                <Image
-                  source={{ uri: category.image }}
-                  style={styles.categoryImage}
-                />
-                <Text style={styles.categoryName}>{category.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+        {/* ✅ Categories Section transferred to CategoriesRe */}
+        <View>
+          <CategoriesRe
+            onCategorySelect={handleCategorySelect}
+            selectedCategory={selectedCategory}
+          />
         </View>
 
         {/* Loading Indicator */}
@@ -154,13 +129,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
   header: { padding: 20 },
   title: { fontSize: 28, fontWeight: "bold", color: "#1A1A1A" },
-  categoriesSection: { marginTop: 20, paddingHorizontal: 20 },
-  sectionTitle: { fontSize: 20, fontWeight: "600", marginBottom: 10 },
-  categoriesContainer: { flexDirection: "row" },
-  categoryCard: { alignItems: "center", marginRight: 15 },
-  selectedCategory: { borderBottomWidth: 2, borderBottomColor: "#FF6B6B" },
-  categoryImage: { width: 80, height: 80, borderRadius: 40, marginBottom: 5 },
-  categoryName: { fontSize: 14, fontWeight: "500" },
   placesSection: { marginTop: 30, paddingHorizontal: 20 },
   placeCard: {
     flexDirection: "row",

@@ -1,283 +1,58 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+const {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} = require("@google/generative-ai");
 
-/**
- * Get personalized travel recommendations from Gemini AI
- * @param {string} selectedCategory - The category of destinations (Beach, Mountain, Camp)
- * @param {string} userPreferences - User preferences as comma-separated keywords
- * @returns {Promise<Array>} - Array of recommendation objects
- */
-export async function getPersonalizedRecommendations(
-  selectedCategory,
-  userPreferences
-) {
-  try {
-    // Initialize the Gemini API client
-    const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY || "";
-    if (!apiKey) {
-      console.error("Gemini API key is missing");
-      return [];
-    }
+const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+const genAI = new GoogleGenerativeAI(apiKey);
 
-    // Create a new instance with the correct API version
-    const genAI = new GoogleGenerativeAI(apiKey);
+const RECOMMENDATIONCATEGORY_PROMPT = `
+Generate top travel recommendations based on the selected category: {selectedCategory}. 
 
-    // Use the correct model name
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+Provide a mix of:
+- Global Recommendations: Top destinations worldwide relevant to the category.
+- Local Recommendations: Popular and highly-rated places nearby that fit the category.
 
-    console.log("Using Gemini model:", model.modelName);
+Return 10-12 concise suggestions per scope with only the destination name and a brief reason for the recommendation. 
+Give the ouput in JSON format.
+`;
 
-    const prompt = `As a travel recommendation expert, suggest 5 destinations that match the following criteria:
-    - Category: ${selectedCategory}
-    - User Preferences: ${userPreferences}
-    
-    For each destination, provide:
-    - Name
-    - Brief description (max 2 sentences)
-    - What makes it special for this specific user
-    
-    Format the response as a JSON array of objects with name, description, and reason properties.`;
+const model = genAI.getGenerativeModel({
+  model: "gemini-2.0-flash",
+});
 
-    // Set a timeout for the request
-    const result = await Promise.race([
-      model.generateContent(prompt),
-      new Promise((_, reject) =>
-        setTimeout(
-          () => reject(new Error("Gemini API request timed out")),
-          15000
-        )
-      ),
-    ]);
+const generationConfig = {
+  temperature: 1,
+  topP: 0.95,
+  topK: 40,
+  maxOutputTokens: 8192,
+  //   want op in json format
+  responseMimeType: "application/json",
+};
 
-    // The issue is here - The response handling needs to be fixed
-    // Check if result has a response method or is already the response object
-    let text;
-    if (typeof result.response === "function") {
-      // API version where result has a response() method
-      const response = await result.response();
-      text = response.text();
-    } else if (result.response && typeof result.response.text === "function") {
-      // API version where result.response is already an object
-      text = result.response.text();
-    } else if (result.text && typeof result.text === "function") {
-      // API version where result itself has a text() method
-      text = result.text();
-    } else if (result.candidates && result.candidates[0]?.content?.parts) {
-      // Newer API version structure
-      text = result.candidates[0].content.parts[0]?.text || "";
-    } else {
-      // Fallback if we can't find the text in any expected location
-      console.error("Unexpected Gemini API response structure:", result);
-      return getFallbackRecommendations(selectedCategory);
-    }
+export const chatSession = model.startChat({
+  generationConfig,
 
-    console.log("Raw Gemini response:", text.substring(0, 100) + "...");
+  history: [
+    {
+      role: "user",
+      parts: [
+        {
+          text: "Generate top travel recommendations based on the selected category: Beach.\n\nProvide a mix of:\n- Global Recommendations: Top destinations worldwide relevant to the category.\n- Local Recommendations: Popular and highly-rated places nearby that fit the category.\n\nReturn 10-12 concise suggestions per scope with only the destination name and a brief reason for the recommendation.\nGive the ouput in JSON format.\n",
+        },
+      ],
+    },
+    {
+      role: "model",
+      parts: [
+        {
+          text: '```json\n{\n  "Beach Travel Recommendations": {\n    "Global Destinations": [\n      {\n        "destination": "Maldives",\n        "reason": "Luxury overwater bungalows, pristine white sand, and vibrant coral reefs."\n      },\n      {\n        "destination": "Bora Bora, French Polynesia",\n        "reason": "Iconic volcanic peaks, turquoise lagoons, and secluded beaches perfect for romance."\n      },\n      {\n        "destination": "Maui, Hawaii, USA",\n        "reason": "Diverse beaches for surfing, snorkeling, and relaxation, plus stunning volcanic landscapes."\n      },\n      {\n        "destination": "The Seychelles",\n        "reason": "Unique granite boulders, lush vegetation, and secluded, untouched beaches."\n      },\n      {\n        "destination": "Palawan, Philippines",\n        "reason": "El Nido and Coron offer stunning limestone cliffs, hidden lagoons, and incredible diving."\n      },\n      {\n        "destination": "Bali, Indonesia",\n        "reason": "Volcanic beaches, surfing hotspots, rice paddies, and vibrant culture."\n      },\n      {\n        "destination": "Santorini, Greece",\n        "reason": "Dramatic cliffs, white-washed villages, and unique volcanic black sand beaches."\n      },\n      {\n        "destination": "Rio de Janeiro, Brazil",\n        "reason": "Iconic beaches like Copacabana and Ipanema offer a vibrant atmosphere and stunning views."\n      },\n      {\n        "destination": "Phuket, Thailand",\n        "reason": "Beautiful beaches, turquoise waters, and a wide range of activities and nightlife."\n      },\n      {\n        "destination": "Fiji",\n        "reason": "Soft coral capital of the world, beautiful island vibe and friendly locals."\n      },\n      {\n        "destination": "Zanzibar, Tanzania",\n        "reason": "Spice Island offering pristine beaches, turquoise waters, and a rich cultural history."\n      },\n      {\n        "destination": "Amalfi Coast, Italy",\n        "reason": "Picturesque coastal towns, dramatic cliffs, and charming beaches perfect for a scenic getaway."\n      }\n    ],\n    "Local Destinations": [\n      {\n        "destination": "Miami Beach, Florida, USA",\n        "reason": "Iconic art deco architecture, vibrant nightlife, and wide sandy beaches."\n      },\n      {\n        "destination": "Outer Banks, North Carolina, USA",\n        "reason": "Beautiful beaches, historical landmarks, and great for fishing and watersports."\n      },\n      {\n        "destination": "Santa Monica, California, USA",\n        "reason": "Classic beach town with a famous pier, amusement park, and beautiful coastline."\n      },\n      {\n        "destination": "Cape Cod, Massachusetts, USA",\n        "reason": "Charming New England beaches, picturesque towns, and delicious seafood."\n      },\n      {\n        "destination": "Gulf Shores, Alabama, USA",\n        "reason": "Beautiful white-sand beaches, family-friendly atmosphere, and great for fishing."\n      },\n      {\n        "destination": "Myrtle Beach, South Carolina, USA",\n        "reason": "Known for its family-friendly attractions, wide beaches, and live entertainment."\n      },\n      {\n        "destination": "San Diego, California, USA",\n        "reason": "Beautiful beaches, perfect for swimming, surfing, or just relaxing."\n      },\n      {\n        "destination": "Hilton Head Island, South Carolina, USA",\n        "reason": "Golf courses, beautiful beaches, and a relaxed island vibe."\n      },\n      {\n        "destination": "Destin, Florida, USA",\n        "reason": "Emerald coast with white sand and clear waters."\n      },\n      {\n        "destination": "Tybee Island, Georgia, USA",\n        "reason": "Family-friendly beaches with calm waters and historical sites nearby."\n      },\n       {\n        "destination": "Virginia Beach, Virginia, USA",\n        "reason": "Boardwalk with attractions, beautiful beaches, and a vibrant atmosphere."\n      },\n      {\n        "destination": "Monterey, California, USA",\n        "reason": "Offers beaches, famous aquarium, and the scenic 17-mile drive."\n      }\n    ]\n  }\n}\n```\n',
+        },
+      ],
+    },
+  ],
+});
 
-    try {
-      // Check if the response looks like JSON
-      if (!text.trim().startsWith("[") && !text.trim().startsWith("{")) {
-        console.warn("Response is not in JSON format:", text);
-        return parseNonJsonResponse(text, selectedCategory);
-      }
-
-      // Parse JSON response
-      const recommendations = JSON.parse(text);
-
-      // Ensure we have valid recommendations
-      if (!Array.isArray(recommendations)) {
-        console.warn("AI response is not an array:", recommendations);
-        return [];
-      }
-
-      // Validate each recommendation has the required properties
-      return recommendations.filter(
-        (rec) =>
-          rec &&
-          typeof rec === "object" &&
-          "name" in rec &&
-          "description" in rec &&
-          "reason" in rec
-      );
-    } catch (parseError) {
-      console.error(
-        "Failed to parse AI response:",
-        parseError,
-        "Raw text:",
-        text
-      );
-      return parseNonJsonResponse(text, selectedCategory);
-    }
-  } catch (error) {
-    console.error("Error getting AI recommendations:", error.message);
-
-    // Return fallback recommendations if API fails
-    return getFallbackRecommendations(selectedCategory);
-  }
-}
-
-// Keeping the rest of your functions unchanged
-function parseNonJsonResponse(text, category) {
-  try {
-    // Simple parser for text that might contain recommendations
-    const recommendations = [];
-    const lines = text.split("\n");
-
-    let currentRec = null;
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-
-      // Look for patterns that might indicate a new recommendation
-      if (trimmedLine.match(/^\d+\.\s|^-\s[A-Z]|^[A-Z][a-zA-Z\s]+:/)) {
-        if (currentRec && currentRec.name) {
-          recommendations.push(currentRec);
-        }
-
-        currentRec = {
-          name: trimmedLine.replace(/^\d+\.\s|-\s|:/g, "").trim(),
-          description: "",
-          reason: "",
-        };
-      } else if (currentRec && trimmedLine) {
-        // Add content to description or reason
-        if (!currentRec.description) {
-          currentRec.description = trimmedLine;
-        } else if (!currentRec.reason) {
-          currentRec.reason = trimmedLine;
-        }
-      }
-    }
-
-    // Add the last recommendation if exists
-    if (currentRec && currentRec.name) {
-      recommendations.push(currentRec);
-    }
-
-    if (recommendations.length > 0) {
-      return recommendations;
-    }
-
-    return getFallbackRecommendations(category);
-  } catch (error) {
-    console.error("Error parsing non-JSON response:", error);
-    return getFallbackRecommendations(category);
-  }
-}
-
-function getFallbackRecommendations(category) {
-  console.log("Using fallback recommendations for:", category);
-
-  const fallbacks = {
-    Beach: [
-      {
-        name: "Bora Bora",
-        description:
-          "A paradise island with crystal-clear lagoons and overwater bungalows. Perfect for snorkeling and relaxation.",
-        reason:
-          "Offers pristine beaches and spectacular scenic views perfect for nature lovers.",
-      },
-      {
-        name: "Maldives",
-        description:
-          "An archipelago of 1,000+ coral islands with stunning white-sand beaches. Known for luxury resorts and vibrant marine life.",
-        reason:
-          "Combines adventure opportunities with breathtaking natural beauty.",
-      },
-      {
-        name: "Copacabana Beach, Brazil",
-        description:
-          "Famous beach in Rio de Janeiro with golden sands and vibrant atmosphere. Known for sports and lively culture.",
-        reason:
-          "Offers both natural beauty and opportunities for adventure activities.",
-      },
-      {
-        name: "Maya Bay, Thailand",
-        description:
-          "Stunning bay surrounded by limestone cliffs made famous by 'The Beach' movie. Recently reopened with conservation measures.",
-        reason:
-          "Provides a perfect combination of natural beauty and adventure in a protected environment.",
-      },
-      {
-        name: "Whitehaven Beach, Australia",
-        description:
-          "Famous for its pure white silica sand and turquoise waters. Located in the heart of the Great Barrier Reef.",
-        reason:
-          "Offers pristine natural beauty and nearby adventure opportunities for snorkeling and diving.",
-      },
-    ],
-    Mountain: [
-      {
-        name: "Swiss Alps",
-        description:
-          "Iconic mountain range with breathtaking peaks and valleys. Perfect for hiking, skiing and taking in panoramic views.",
-        reason:
-          "Offers some of the world's most spectacular scenic views and outdoor adventure opportunities.",
-      },
-      {
-        name: "Patagonia",
-        description:
-          "Dramatic mountain landscapes spanning Argentina and Chile. Known for jagged peaks, glaciers, and diverse ecosystems.",
-        reason:
-          "A paradise for adventurous nature lovers with unparalleled scenic views.",
-      },
-      {
-        name: "Rocky Mountains",
-        description:
-          "Extensive mountain range with diverse wildlife and outdoor activities. Features numerous national parks including Yellowstone.",
-        reason:
-          "Perfect for experiencing mountain adventure with incredible natural scenery.",
-      },
-      {
-        name: "Himalayas",
-        description:
-          "Home to the world's highest peaks including Mount Everest. Offers trekking routes for all experience levels.",
-        reason:
-          "The ultimate destination for those seeking majestic mountain views and challenging adventures.",
-      },
-      {
-        name: "New Zealand Southern Alps",
-        description:
-          "Spectacular mountain range with diverse landscapes from forests to glaciers. Featured in many films including Lord of the Rings.",
-        reason:
-          "Combines breathtaking scenic beauty with numerous adventure opportunities in a pristine environment.",
-      },
-    ],
-    Camp: [
-      {
-        name: "Yosemite National Park",
-        description:
-          "Iconic park with granite cliffs, waterfalls, and ancient sequoias. Offers numerous campgrounds with varying levels of amenities.",
-        reason:
-          "Provides the perfect balance of adventure and natural scenery for camping enthusiasts.",
-      },
-      {
-        name: "Banff National Park",
-        description:
-          "Canada's oldest national park with stunning mountain landscapes and turquoise lakes. Features well-maintained campgrounds and hiking trails.",
-        reason:
-          "Offers spectacular scenic views with excellent camping facilities in pristine nature.",
-      },
-      {
-        name: "Lake District, UK",
-        description:
-          "Beautiful mountainous region with lakes, forests and quaint villages. Provides a mix of wild camping and serviced sites.",
-        reason:
-          "Perfect for nature lovers seeking scenic landscapes with a touch of adventure.",
-      },
-      {
-        name: "Kruger National Park",
-        description:
-          "One of Africa's largest game reserves with diverse wildlife and safari experiences. Offers everything from basic camping to luxury glamping.",
-        reason:
-          "Combines adventure with unforgettable natural experiences in a unique setting.",
-      },
-      {
-        name: "Joshua Tree National Park",
-        description:
-          "Desert landscape with unique rock formations and the distinctive Joshua trees. Popular for stargazing and rock climbing.",
-        reason:
-          "Provides a unique desert camping experience with spectacular views and adventure activities.",
-      },
-    ],
-  };
-
-  return fallbacks[category] || [];
-}
+// const result = await chatSession.sendMessage("INSERT_INPUT_HERE");
+// console.log(result.response.text());

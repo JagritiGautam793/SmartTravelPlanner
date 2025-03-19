@@ -27,7 +27,7 @@ export const chatSession = model.startChat({
       role: "user",
       parts: [
         {
-          text: "enerated Recommendation Prompt: Based on the user's past trips (Locations: Sikkim, India, Paris, France, Jaipur, Rajasthan, India, Goa, India, Delhi, India, Spain (Multi-City), Marbella, Spain, Goa, India, Trip Names: , , , , , , , ), suggest new destinations or activities.",
+          text: "Generated Recommendation Prompt: Based on the user's past trips (Locations: Sikkim, India, Paris, France, Jaipur, Rajasthan, India, Goa, India, Delhi, India, Spain (Multi-City), Marbella, Spain, Goa, India, Trip Names: , , , , , , , ), suggest new destinations or activities.",
         },
       ],
     },
