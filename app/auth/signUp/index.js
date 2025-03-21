@@ -63,23 +63,21 @@ export default function SignUp() {
 
   return (
     <ImageBackground
-      source={{
-        uri: "https://img.freepik.com/premium-photo/scattered-variety-pills-drugs-spay-bottles-thermometer-syringe-empty-shopping-trolley-cart-blue-background-pharmacy-shopping-concept_130265-10491.jpg?w=996",
-      }}
+      source={require("../../../assets/images/back.jpg")}
       style={styles.backgroundImage}
     >
       <Toast />
       <SafeAreaView style={styles.container}>
         <BlurView intensity={10} tint="light" style={styles.blurContainer}>
           <LinearGradient
-            colors={["rgba(255,255,255,0.2)", "rgba(255,255,255,0.5)"]}
+            colors={["rgba(255,255,255,0.5)", "rgba(255,255,255,0.5)"]}
             style={styles.gradient}
           >
             <View style={styles.content}>
               {/* <TouchableOpacity onPress={() => router.back()}>
                 <AntDesign name="arrowleft" size={24} color="black" />
               </TouchableOpacity> */}
-              <Text style={styles.title}>Create New Account</Text>
+              <Text style={styles.title}>Set Up Account</Text>
 
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Full Name</Text>
@@ -163,13 +161,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 32,
     color: "#333333",
-    marginBottom: 5,
+    marginBottom: 25,
     textShadowColor: "rgba(255, 255, 255, 0.5)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
   },
   inputContainer: {
-    marginBottom: 25,
+    marginBottom: 10,
   },
   label: {
     fontSize: 16,
