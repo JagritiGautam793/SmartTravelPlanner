@@ -9,35 +9,38 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Video } from "expo-av";
-import { router, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 
 const { width, height } = Dimensions.get("window");
 
-const Button = ({ title, onPress, variant }) => (
-  <TouchableOpacity
-    style={[
-      styles.button,
-      variant === "outline" ? styles.buttonOutline : styles.buttonFilled,
-    ]}
-    onPress={() => router.push("/auth/signIn")}
-  >
-    <Text
-      style={[
-        styles.buttonText,
-        variant === "outline"
-          ? styles.buttonTextOutline
-          : styles.buttonTextFilled,
-      ]}
-    >
-      {title}
-    </Text>
-  </TouchableOpacity>
-);
-
 export default function Login() {
   const router = useRouter();
+
+  // Reusable Button Component Inside Login.js
+  const Button = ({ title, onPress, variant }) => (
+    <TouchableOpacity
+      style={[
+        styles.button,
+        variant === "outline" ? styles.buttonOutline : styles.buttonFilled,
+      ]}
+      onPress={onPress}
+    >
+      {variant === "filled" ? (
+        <LinearGradient
+          colors={["rgba(0,0,0,0.6)", "rgba(0,0,0,0.8)"]}
+          style={styles.gradientButton}
+        >
+          <Text style={styles.buttonTextFilled}>{title}</Text>
+        </LinearGradient>
+      ) : (
+        <Text style={styles.buttonTextOutline}>{title}</Text>
+      )}
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
+      {/* Background Video */}
       <Video
         source={{
           uri: "https://videos.pexels.com/video-files/8045117/8045117-sd_360_640_25fps.mp4",
@@ -48,10 +51,14 @@ export default function Login() {
         isLooping
         isMuted
       />
+
+      {/* Dark Gradient Overlay */}
       <LinearGradient
         colors={["transparent", "rgba(0,0,0,1)"]}
         style={styles.gradient}
       />
+
+      {/* Safe Area Content */}
       <SafeAreaView style={styles.safeArea} edges={["right", "left", "bottom"]}>
         <View style={styles.content}>
           <Text style={styles.title}>
@@ -62,14 +69,21 @@ export default function Login() {
             every step.
           </Text>
         </View>
+
+        {/* Button Section */}
         <View style={styles.footer}>
-          <Button title="Get Started" variant="outline" />
+          <Button
+            title="Get Started"
+            variant="outline"
+            onPress={() => router.push("/auth/signIn")}
+          />
         </View>
       </SafeAreaView>
     </View>
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -116,28 +130,33 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   button: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 30,
+    width: "100%",
+    borderRadius: 15,
+    overflow: "hidden",
+    marginTop: 20,
+  },
+  gradientButton: {
+    paddingVertical: 15,
     justifyContent: "center",
     alignItems: "center",
   },
   buttonOutline: {
     borderWidth: 1,
-    borderColor: "white",
+    borderColor: "#fff",
+    paddingVertical: 15,
+    alignItems: "center",
   },
   buttonFilled: {
-    backgroundColor: "white",
+    backgroundColor: "transparent",
   },
-  buttonText: {
+  buttonTextOutline: {
+    color: "#fff",
     fontSize: 16,
     fontWeight: "600",
   },
-  buttonTextOutline: {
-    color: "white",
-  },
   buttonTextFilled: {
-    color: "black",
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

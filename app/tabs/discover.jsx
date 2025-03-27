@@ -70,11 +70,6 @@ export default function DiscoverScreen() {
           <Text style={styles.title}>Discover Places</Text>
         </View>
 
-        {/* Render Recomm component */}
-        <View>
-          <Recomm />
-        </View>
-
         {/* ✅ Categories Section transferred to CategoriesRe */}
         <View>
           <CategoriesRe
@@ -92,34 +87,12 @@ export default function DiscoverScreen() {
           />
         )}
 
-        {/* Display Places from Google API */}
-        <View style={styles.placesSection}>
-          <Text style={styles.sectionTitle}>Popular Places</Text>
-          {places.length === 0 && !loading ? (
-            <Text style={styles.emptyText}>
-              Select a category to see places.
-            </Text>
-          ) : (
-            places.map((place) => (
-              <View key={place.id} style={styles.placeCard}>
-                {place.image && (
-                  <Image
-                    source={{ uri: place.image }}
-                    style={styles.placeImage}
-                  />
-                )}
-                <View style={styles.placeInfo}>
-                  <Text style={styles.placeName}>{place.name}</Text>
-                  <Text style={styles.placeAddress}>{place.address}</Text>
-                  <Text style={styles.placeRating}>⭐ {place.rating}</Text>
-                </View>
-              </View>
-            ))
-          )}
-        </View>
-
         {/* AI Recommendations Section */}
-        {renderAIRecommendations()}
+
+        {/* Render Recomm component */}
+        <View>
+          <Recomm />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
