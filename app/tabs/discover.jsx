@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+
 import {
   View,
   Text,
@@ -14,6 +15,7 @@ import { getPersonalizedRecommendations } from "./../../configs/geminiReco";
 import Recomm from "../../components/UserTripDetails/Recomm";
 import FetchUserTrips from "../../components/UserTripDetails/FetchUserTrip";
 import CategoriesRe from "../../components/UserTripDetails/CategoriesRe"; // ✅ Import CategoriesRe
+import WeatherDetails from "../../configs/WeatherDetails";
 
 export default function DiscoverScreen() {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -90,8 +92,13 @@ export default function DiscoverScreen() {
         {/* AI Recommendations Section */}
 
         {/* Render Recomm component */}
+
         <View>
           <Recomm />
+        </View>
+
+        <View>
+          <WeatherDetails />
         </View>
       </ScrollView>
     </SafeAreaView>
