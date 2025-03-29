@@ -15,7 +15,6 @@ import { getPersonalizedRecommendations } from "./../../configs/geminiReco";
 import Recomm from "../../components/UserTripDetails/Recomm";
 import FetchUserTrips from "../../components/UserTripDetails/FetchUserTrip";
 import CategoriesRe from "../../components/UserTripDetails/CategoriesRe"; // ✅ Import CategoriesRe
-import WeatherDetails from "../../configs/WeatherDetails";
 
 export default function DiscoverScreen() {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -95,10 +94,6 @@ export default function DiscoverScreen() {
 
         <View>
           <Recomm />
-        </View>
-
-        <View>
-          <WeatherDetails />
         </View>
       </ScrollView>
     </SafeAreaView>

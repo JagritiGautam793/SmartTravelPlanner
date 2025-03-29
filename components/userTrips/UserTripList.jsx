@@ -5,6 +5,7 @@ import UserTripCard from "./UserTripCard";
 import { ObjectFlags } from "typescript";
 import { useRoute } from "@react-navigation/native";
 import { useRouter } from "expo-router";
+import WeatherDetails from "../../configs/WeatherDetails";
 
 export default function UserTripList({ userTrips }) {
   if (!userTrips || userTrips.length === 0) {
@@ -32,6 +33,9 @@ export default function UserTripList({ userTrips }) {
   return (
     userTrips && (
       <View>
+        <View>
+          <WeatherDetails />
+        </View>
         <View
           style={{
             marginTop: 20,
