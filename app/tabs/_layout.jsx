@@ -16,9 +16,9 @@ export default function TabLayout() {
         name="mytrip"
         options={{
           tabBarLabel: "My Trip",
-          tabBarLabelStyle: { color: "black" },
+          tabBarLabelStyle: { color: "#007bff" },
           tabBarIcon: () => (
-            <Entypo name="location-pin" size={24} color="black" />
+            <Entypo name="location-pin" size={24} color="#007bff" />
           ),
         }}
       />
@@ -26,9 +26,9 @@ export default function TabLayout() {
         name="discover"
         options={{
           tabBarLabel: "Discover",
-          tabBarLabelStyle: { color: "black" },
+          tabBarLabelStyle: { color: "#007bff" },
           tabBarIcon: () => (
-            <FontAwesome name="globe" size={24} color="black" />
+            <FontAwesome name="globe" size={24} color="#007bff" />
           ),
         }}
       />
@@ -36,8 +36,10 @@ export default function TabLayout() {
         name="profile"
         options={{
           tabBarLabel: "Profile",
-          tabBarLabelStyle: { color: "black" },
-          tabBarIcon: () => <Ionicons name="people" size={24} color="black" />,
+          tabBarLabelStyle: { color: "#007bff" },
+          tabBarIcon: () => (
+            <Ionicons name="people" size={24} color="#007bff" />
+          ),
         }}
       />
     </Tabs>
