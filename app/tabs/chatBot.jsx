@@ -1,55 +1,64 @@
-import React, { useState } from "react";
-import { View, TextInput, Button, Text, StyleSheet } from "react-native";
-import { generateResponse } from "../chat";
+import { generateAPIUrl } from "@/utils";
+import { useChat } from "@ai-sdk/react";
+import { fetch as expoFetch } from "expo/fetch";
+import { View, TextInput, ScrollView, Text, SafeAreaView } from "react-native";
 
 export default function App() {
-  const [input, setInput] = useState("");
-  const [response, setResponse] = useState("");
+  const { messages, error, handleInputChange, input, handleSubmit } = useChat({
+    fetch: expoFetch,
+    api: generateAPIUrl("/api/chat"),
+    onError: (error) => console.error(error, "ERROR"),
+  });
 
-  async function handleSubmit() {
-    setResponse("Generating response..."); // Show loading text
-    const aiResponse = await generateResponse(input);
-    setResponse(aiResponse);
-  }
+  if (error) return <Text>{error.message}</Text>;
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Ask AI Anything</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Type your question..."
-        value={input}
-        onChangeText={setInput}
-      />
-      <Button title="Generate" onPress={handleSubmit} />
-      <Text style={styles.response}>{response}</Text>
-    </View>
+    <SafeAreaView style={{ height: "100vh" }}>
+      <View
+        style={{
+          height: "95%",
+          display: "flex",
+          flexDirection: "column",
+          paddingHorizontal: 8,
+        }}
+      >
+        <ScrollView style={{ flex: 1 }}>
+          {messages.map((m) => (
+            <View key={m.id} style={{ marginVertical: 8 }}>
+              <View>
+                <Text style={{ fontWeight: 700 }}>{m.role}</Text>
+                {m.toolInvocations ? (
+                  <Text>{JSON.stringify(m.toolInvocations, null, 2)}</Text>
+                ) : (
+                  <Text>{m.content}</Text>
+                )}
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+
+        <View style={{ marginTop: 8 }}>
+          <TextInput
+            style={{ backgroundColor: "white", padding: 8 }}
+            placeholder="Say something..."
+            value={input}
+            onChange={(e) =>
+              handleInputChange({
+                ...e,
+                target: {
+                  ...e.target,
+                  value: e.nativeEvent.text,
+                },
+              })
+            }
+            onSubmitEditing={(e) => {
+              handleSubmit(e);
+              e.preventDefault();
+            }}
+            autoFocus={true}
+          />
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: "center",
-    backgroundColor: "#f8f9fa",
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  input: {
-    borderWidth: 1,
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-    borderColor: "#ccc",
-  },
-  response: {
-    marginTop: 20,
-    fontSize: 16,
-    fontStyle: "italic",
-  },
-});
