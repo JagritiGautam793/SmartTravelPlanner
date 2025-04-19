@@ -31,36 +31,74 @@ export default function ChatBot() {
     api: generateAPIUrl("/api/chat"),
     onError: (error) => console.error(error, "ERROR"),
     onFinish: (message) => {
-      // Check for tool invocation result
+      // Check for tool calls and responses in the message
+      if (message && message.tool_calls && message.tool_calls.length > 0) {
+        // Find any currency conversion tool calls
+        const currencyToolCall = message.tool_calls.find(
+          (call) => call.function?.name === "convertCurrency"
+        );
+
+        if (currencyToolCall && currencyToolCall.function?.result) {
+          try {
+            // Parse the tool result
+            const result = JSON.parse(currencyToolCall.function.result);
+
+            if (result.type === "currency_conversion") {
+              // Show currency converter with the result data
+              setShowCurrencyConverter(true);
+              setCurrentConversionData(result);
+            }
+          } catch (e) {
+            console.error("Failed to parse tool result:", e);
+          }
+        }
+      }
+
+      // Check if the content directly contains currency conversion data
+      // This handles when AI returns the result directly
       if (
-        message.content &&
         typeof message.content === "object" &&
-        message.content.type === "currency_conversion"
+        message.content?.type === "currency_conversion"
       ) {
         setShowCurrencyConverter(true);
         setCurrentConversionData(message.content);
-
-        // Add a message explaining the currency conversion
-        append({
-          role: "assistant",
-          content: `I've converted ${message.content.amount} ${message.content.fromCurrency} to ${message.content.convertedAmount} ${message.content.toCurrency}. Here's a converter you can use for more conversions:`,
-        });
       }
     },
     onResponse: async (response) => {
-      // For non-streaming responses, we need to parse the JSON
+      // For non-streaming responses, check for direct tool results
       const contentType = response.headers.get("content-type") || "";
 
       if (contentType.includes("application/json")) {
         try {
           const data = await response.json();
 
+          // If we received a direct currency conversion result
           if (data.type === "currency_conversion") {
             setShowCurrencyConverter(true);
             setCurrentConversionData(data);
+
+            // Return formatted data for the chat UI
             return {
-              content: data,
+              id: Date.now().toString(),
               role: "assistant",
+              content: `I've converted ${data.amount} ${data.fromCurrency} to ${
+                data.convertedAmount
+              } ${data.toCurrency}. The exchange rate is 1 ${
+                data.fromCurrency
+              } = ${data.exchangeRate.toFixed(4)} ${data.toCurrency}.`,
+              tool_calls: [
+                {
+                  function: {
+                    name: "convertCurrency",
+                    arguments: JSON.stringify({
+                      amount: data.amount,
+                      fromCurrency: data.fromCurrency,
+                      toCurrency: data.toCurrency,
+                    }),
+                    result: JSON.stringify(data),
+                  },
+                },
+              ],
             };
           }
         } catch (e) {
@@ -84,58 +122,11 @@ export default function ChatBot() {
 
   // Function to handle user request for currency conversion
   const handleCurrencyRequest = () => {
-    // Improved patterns to identify currency conversion requests
-    const currencyPatterns = [
-      /convert\s+(\d+(\.\d+)?)\s+([a-z]{3})\s+to\s+([a-z]{3})/i, // "convert 100 USD to EUR"
-      /exchange\s+(\d+(\.\d+)?)\s+([a-z]{3})\s+to\s+([a-z]{3})/i, // "exchange 50 GBP to JPY"
-      /(\d+(\.\d+)?)\s+([a-z]{3})\s+in\s+([a-z]{3})/i, // "50 USD in EUR"
-      /(\d+(\.\d+)?)\s+([a-z]{3})\s+to\s+([a-z]{3})/i, // "100 EUR to USD"
-      /currency\s+convert/i, // Generic "currency convert" request
-      /exchange\s+rate/i, // Generic "exchange rate" request
-    ];
+    // Simple check for generic currency terms rather than detailed NLP
+    const hasCurrencyTerms =
+      /currenc|exchang|conver|dollar|euro|pound|yen|rate/i.test(input);
 
-    // Check if any pattern matches
-    for (const pattern of currencyPatterns) {
-      const match = input.match(pattern);
-      if (match) {
-        // If we have a structured match with groups (amount, from, to currencies)
-        if (match.length >= 5) {
-          const amount = match[1];
-          const fromCurrency = match[3].toUpperCase();
-          const toCurrency = match[4].toUpperCase();
-
-          // Add user message
-          append({
-            role: "user",
-            content: input,
-          });
-
-          // Clear input
-          handleInputChange({ target: { value: "" } });
-
-          // Let the AI handle the conversion with the tool
-          append({
-            role: "assistant",
-            content: "Converting currency...",
-          });
-
-          // Add a specific currency conversion request that will trigger the tool
-          append(
-            {
-              role: "user",
-              content: `Convert ${amount} ${fromCurrency} to ${toCurrency}`,
-            },
-            { skipChatCompletion: false }
-          );
-
-          return true;
-        }
-
-        // Generic currency conversion request
-        return false; // Let handleSubmit process it with the AI
-      }
-    }
-
+    // Let the AI handle all currency-related detection
     return false;
   };
 
@@ -143,11 +134,8 @@ export default function ChatBot() {
   const handleFormSubmit = (e) => {
     e.preventDefault();
 
-    // If it's a currency request, handle it client-side
-    if (!handleCurrencyRequest()) {
-      // Otherwise, use the normal submit handler
-      handleSubmit(e);
-    }
+    // Always use the normal submit handler
+    handleSubmit(e);
   };
 
   if (error) return <Text style={styles.errorText}>{error.message}</Text>;

@@ -109,10 +109,14 @@ export default function CurrencyConverter({ initialData = null }) {
 
   // Auto-convert when component mounts if we have data
   useEffect(() => {
-    if (!initialData && amount && !isNaN(parseFloat(amount))) {
+    if (initialData) {
+      // If we got data from tool invocation, use it directly
+      setResult(initialData);
+    } else if (amount && !isNaN(parseFloat(amount))) {
+      // Otherwise run a conversion normally
       convertCurrency();
     }
-  }, []);
+  }, [initialData]);
 
   // Swap currencies function
   const swapCurrencies = () => {
