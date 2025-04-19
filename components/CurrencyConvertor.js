@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  Animated,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { generateAPIUrl } from "@/utils";
@@ -25,6 +26,110 @@ const CURRENCIES = [
   { code: "SGD", name: "Singapore Dollar" },
 ];
 
+// Skeleton UI component for currency converter
+const ConverterSkeleton = () => {
+  const pulseAnim = React.useRef(new Animated.Value(0.3)).current;
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0.3,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    animation.start();
+
+    return () => animation.stop();
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.titleContainer}>
+        <Animated.View
+          style={[
+            styles.skeletonText,
+            styles.titleSkeleton,
+            { opacity: pulseAnim },
+          ]}
+        />
+      </View>
+
+      {/* Amount Input Skeleton */}
+      <View style={styles.inputContainer}>
+        <Animated.View
+          style={[
+            styles.skeletonText,
+            styles.labelSkeleton,
+            { opacity: pulseAnim },
+          ]}
+        />
+        <Animated.View style={[styles.skeletonInput, { opacity: pulseAnim }]} />
+      </View>
+
+      {/* Currency Selection Skeleton */}
+      <View style={styles.currencyRow}>
+        <View style={styles.currencySelector}>
+          <Animated.View
+            style={[
+              styles.skeletonText,
+              styles.labelSkeleton,
+              { opacity: pulseAnim },
+            ]}
+          />
+          <Animated.View
+            style={[styles.skeletonPicker, { opacity: pulseAnim }]}
+          />
+        </View>
+
+        {/* Swap Button Skeleton */}
+        <Animated.View style={[styles.skeletonSwap, { opacity: pulseAnim }]} />
+
+        <View style={styles.currencySelector}>
+          <Animated.View
+            style={[
+              styles.skeletonText,
+              styles.labelSkeleton,
+              { opacity: pulseAnim },
+            ]}
+          />
+          <Animated.View
+            style={[styles.skeletonPicker, { opacity: pulseAnim }]}
+          />
+        </View>
+      </View>
+
+      {/* Convert Button Skeleton */}
+      <Animated.View style={[styles.skeletonButton, { opacity: pulseAnim }]} />
+
+      {/* Result Skeleton */}
+      <View style={styles.resultContainer}>
+        <Animated.View
+          style={[styles.skeletonText, { width: "40%", opacity: pulseAnim }]}
+        />
+        <Animated.View
+          style={[
+            styles.skeletonText,
+            styles.convertedAmountSkeleton,
+            { opacity: pulseAnim },
+          ]}
+        />
+        <Animated.View
+          style={[styles.skeletonText, { width: "60%", opacity: pulseAnim }]}
+        />
+      </View>
+    </View>
+  );
+};
+
 export default function CurrencyConverter({ initialData = null }) {
   // Initial values can come from AI tool response
   const [amount, setAmount] = useState(initialData?.amount?.toString() || "1");
@@ -36,12 +141,14 @@ export default function CurrencyConverter({ initialData = null }) {
   );
   const [result, setResult] = useState(initialData || null);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(!initialData);
   const [error, setError] = useState(null);
 
   // Function to convert currency using our AI tool
   const convertCurrency = async () => {
     if (!amount || isNaN(parseFloat(amount))) {
       setError("Please enter a valid amount");
+      setInitialLoading(false);
       return;
     }
 
@@ -104,6 +211,7 @@ export default function CurrencyConverter({ initialData = null }) {
       setError(err.message || "Error converting currency");
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   };
 
@@ -112,11 +220,21 @@ export default function CurrencyConverter({ initialData = null }) {
     if (initialData) {
       // If we got data from tool invocation, use it directly
       setResult(initialData);
+      setInitialLoading(false);
     } else if (amount && !isNaN(parseFloat(amount))) {
-      // Otherwise run a conversion normally
-      convertCurrency();
+      // Enforce a minimum delay to ensure skeleton displays
+      const timer = setTimeout(() => {
+        convertCurrency();
+      }, 1500); // Show skeleton for at least 1.5 seconds
+
+      return () => clearTimeout(timer);
     }
   }, [initialData]);
+
+  // Show skeleton during initial loading
+  if (initialLoading) {
+    return <ConverterSkeleton />;
+  }
 
   // Swap currencies function
   const swapCurrencies = () => {
@@ -337,5 +455,58 @@ const styles = StyleSheet.create({
   errorText: {
     color: "#e74c3c",
     fontSize: 14,
+  },
+  // Skeleton styles
+  titleContainer: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  skeletonText: {
+    height: 16,
+    borderRadius: 4,
+    backgroundColor: "#E1E9EE",
+    marginVertical: 4,
+  },
+  titleSkeleton: {
+    height: 24,
+    width: 200,
+    marginBottom: 12,
+  },
+  labelSkeleton: {
+    width: 80,
+    marginBottom: 4,
+  },
+  skeletonInput: {
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: "#E1E9EE",
+    width: "100%",
+  },
+  skeletonPicker: {
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: "#E1E9EE",
+    width: "100%",
+  },
+  skeletonSwap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#E1E9EE",
+    marginHorizontal: 8,
+    alignSelf: "flex-end",
+    marginBottom: 8,
+  },
+  skeletonButton: {
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: "#E1E9EE",
+    width: "100%",
+    marginBottom: 16,
+  },
+  convertedAmountSkeleton: {
+    height: 30,
+    width: 150,
+    marginVertical: 8,
   },
 });

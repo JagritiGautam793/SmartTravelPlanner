@@ -17,6 +17,7 @@ export default function ChatBot() {
   const [showCurrencyConverter, setShowCurrencyConverter] = useState(false);
   const [currentConversionData, setCurrentConversionData] = useState(null);
   const scrollViewRef = useRef(null);
+  const [isConverterLoading, setIsConverterLoading] = useState(false);
 
   const {
     messages,
@@ -44,11 +45,14 @@ export default function ChatBot() {
             const result = JSON.parse(currencyToolCall.function.result);
 
             if (result.type === "currency_conversion") {
+              // Set loading state to false and show data
+              setIsConverterLoading(false);
               // Show currency converter with the result data
               setShowCurrencyConverter(true);
               setCurrentConversionData(result);
             }
           } catch (e) {
+            setIsConverterLoading(false);
             console.error("Failed to parse tool result:", e);
           }
         }
@@ -60,6 +64,7 @@ export default function ChatBot() {
         typeof message.content === "object" &&
         message.content?.type === "currency_conversion"
       ) {
+        setIsConverterLoading(false);
         setShowCurrencyConverter(true);
         setCurrentConversionData(message.content);
       }
@@ -74,6 +79,7 @@ export default function ChatBot() {
 
           // If we received a direct currency conversion result
           if (data.type === "currency_conversion") {
+            setIsConverterLoading(false);
             setShowCurrencyConverter(true);
             setCurrentConversionData(data);
 
@@ -102,6 +108,7 @@ export default function ChatBot() {
             };
           }
         } catch (e) {
+          setIsConverterLoading(false);
           console.error("Failed to parse JSON response:", e);
         }
       }
@@ -133,6 +140,11 @@ export default function ChatBot() {
   // Modified submit handler
   const handleFormSubmit = (e) => {
     e.preventDefault();
+
+    // Set converter loading state if the message seems currency-related
+    if (/currenc|exchang|conver|dollar|euro|pound|yen|rate/i.test(input)) {
+      setIsConverterLoading(true);
+    }
 
     // Always use the normal submit handler
     handleSubmit(e);
@@ -179,8 +191,15 @@ export default function ChatBot() {
             </View>
           )}
 
-          {/* Show Currency Converter if user asks for it */}
-          {showCurrencyConverter && (
+          {/* Show Currency Converter Skeleton when loading */}
+          {isConverterLoading && (
+            <View style={styles.converterContainer}>
+              <CurrencyConverter />
+            </View>
+          )}
+
+          {/* Show Currency Converter with data if available */}
+          {showCurrencyConverter && !isConverterLoading && (
             <View style={styles.converterContainer}>
               <CurrencyConverter initialData={currentConversionData} />
               <TouchableOpacity
