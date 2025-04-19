@@ -8,6 +8,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import { generateAPIUrl } from "@/utils";
+import { fetch as expoFetch } from "expo/fetch";
 
 // Popular currency codes
 const CURRENCIES = [
@@ -36,7 +38,7 @@ export default function CurrencyConverter({ initialData = null }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Function to fetch exchange rates and convert
+  // Function to convert currency using our AI tool
   const convertCurrency = async () => {
     if (!amount || isNaN(parseFloat(amount))) {
       setError("Please enter a valid amount");
@@ -47,31 +49,57 @@ export default function CurrencyConverter({ initialData = null }) {
     setError(null);
 
     try {
-      const response = await fetch(
-        `https://api.exchangerate-api.com/v4/latest/${fromCurrency}`
-      );
+      // Call the AI API endpoint with our tool call
+      const response = await expoFetch(generateAPIUrl("/api/chat"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: "user",
+              content: `Convert ${amount} ${fromCurrency} to ${toCurrency}`,
+            },
+          ],
+        }),
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch exchange rates");
+        throw new Error("Failed to convert currency");
       }
 
       const data = await response.json();
 
-      if (!data.rates[toCurrency]) {
-        throw new Error(`Currency ${toCurrency} not found`);
+      // Check if the response contains a currency conversion result
+      if (data.type === "currency_conversion") {
+        setResult(data);
+      } else {
+        // Handle text-based response from AI
+        const responseContent = data.choices?.[0]?.message?.content;
+
+        // Try to extract conversion data from text response
+        if (responseContent) {
+          // Simple regex to find numbers in the response
+          const matches = responseContent.match(/(\d+(\.\d+)?)/g);
+          if (matches && matches.length >= 1) {
+            const convertedAmount = parseFloat(matches[matches.length - 1]);
+            setResult({
+              amount: parseFloat(amount),
+              fromCurrency,
+              toCurrency,
+              convertedAmount,
+              // Estimated exchange rate
+              exchangeRate: convertedAmount / parseFloat(amount),
+              date: new Date().toISOString().split("T")[0],
+            });
+          } else {
+            throw new Error("Could not extract conversion from response");
+          }
+        } else {
+          throw new Error("Invalid response from API");
+        }
       }
-
-      const rate = data.rates[toCurrency];
-      const convertedAmount = parseFloat(amount) * rate;
-
-      setResult({
-        amount: parseFloat(amount),
-        fromCurrency,
-        toCurrency,
-        exchangeRate: rate,
-        convertedAmount: parseFloat(convertedAmount.toFixed(2)),
-        date: data.date,
-      });
     } catch (err) {
       setError(err.message || "Error converting currency");
     } finally {

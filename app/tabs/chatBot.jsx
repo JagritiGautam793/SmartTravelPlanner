@@ -15,6 +15,7 @@ import CurrencyConverter from "../../components/CurrencyConvertor";
 
 export default function ChatBot() {
   const [showCurrencyConverter, setShowCurrencyConverter] = useState(false);
+  const [currentConversionData, setCurrentConversionData] = useState(null);
   const scrollViewRef = useRef(null);
 
   const {
@@ -30,15 +31,19 @@ export default function ChatBot() {
     api: generateAPIUrl("/api/chat"),
     onError: (error) => console.error(error, "ERROR"),
     onFinish: (message) => {
-      // Check if this is a currency conversion response
-      if (message && message.type === "currency_conversion") {
+      // Check for tool invocation result
+      if (
+        message.content &&
+        typeof message.content === "object" &&
+        message.content.type === "currency_conversion"
+      ) {
         setShowCurrencyConverter(true);
+        setCurrentConversionData(message.content);
 
-        // Add the message explaining the currency converter
+        // Add a message explaining the currency conversion
         append({
           role: "assistant",
-          content:
-            message.message || "Here's a currency converter you can use:",
+          content: `I've converted ${message.content.amount} ${message.content.fromCurrency} to ${message.content.convertedAmount} ${message.content.toCurrency}. Here's a converter you can use for more conversions:`,
         });
       }
     },
@@ -52,9 +57,11 @@ export default function ChatBot() {
 
           if (data.type === "currency_conversion") {
             setShowCurrencyConverter(true);
-
-            // Return the data so onFinish can use it
-            return data;
+            setCurrentConversionData(data);
+            return {
+              content: data,
+              role: "assistant",
+            };
           }
         } catch (e) {
           console.error("Failed to parse JSON response:", e);
@@ -77,40 +84,56 @@ export default function ChatBot() {
 
   // Function to handle user request for currency conversion
   const handleCurrencyRequest = () => {
-    // Check if the current input is about currency conversion
+    // Improved patterns to identify currency conversion requests
     const currencyPatterns = [
-      /convert\s+currency/i,
-      /currency\s+convert(er|or)/i,
-      /exchange\s+rate/i,
-      /currency/i,
-      /exchange/i,
-      /convert/i,
+      /convert\s+(\d+(\.\d+)?)\s+([a-z]{3})\s+to\s+([a-z]{3})/i, // "convert 100 USD to EUR"
+      /exchange\s+(\d+(\.\d+)?)\s+([a-z]{3})\s+to\s+([a-z]{3})/i, // "exchange 50 GBP to JPY"
+      /(\d+(\.\d+)?)\s+([a-z]{3})\s+in\s+([a-z]{3})/i, // "50 USD in EUR"
+      /(\d+(\.\d+)?)\s+([a-z]{3})\s+to\s+([a-z]{3})/i, // "100 EUR to USD"
+      /currency\s+convert/i, // Generic "currency convert" request
+      /exchange\s+rate/i, // Generic "exchange rate" request
     ];
 
-    const isCurrencyRequest = currencyPatterns.some((pattern) =>
-      pattern.test(input)
-    );
+    // Check if any pattern matches
+    for (const pattern of currencyPatterns) {
+      const match = input.match(pattern);
+      if (match) {
+        // If we have a structured match with groups (amount, from, to currencies)
+        if (match.length >= 5) {
+          const amount = match[1];
+          const fromCurrency = match[3].toUpperCase();
+          const toCurrency = match[4].toUpperCase();
 
-    if (isCurrencyRequest) {
-      // Add user message
-      append({
-        role: "user",
-        content: input,
-      });
+          // Add user message
+          append({
+            role: "user",
+            content: input,
+          });
 
-      // Clear input
-      handleInputChange({ target: { value: "" } });
+          // Clear input
+          handleInputChange({ target: { value: "" } });
 
-      // Show currency converter directly
-      setShowCurrencyConverter(true);
+          // Let the AI handle the conversion with the tool
+          append({
+            role: "assistant",
+            content: "Converting currency...",
+          });
 
-      // Add assistant message
-      append({
-        role: "assistant",
-        content: "Here's a currency converter you can use:",
-      });
+          // Add a specific currency conversion request that will trigger the tool
+          append(
+            {
+              role: "user",
+              content: `Convert ${amount} ${fromCurrency} to ${toCurrency}`,
+            },
+            { skipChatCompletion: false }
+          );
 
-      return true;
+          return true;
+        }
+
+        // Generic currency conversion request
+        return false; // Let handleSubmit process it with the AI
+      }
     }
 
     return false;
@@ -171,10 +194,13 @@ export default function ChatBot() {
           {/* Show Currency Converter if user asks for it */}
           {showCurrencyConverter && (
             <View style={styles.converterContainer}>
-              <CurrencyConverter />
+              <CurrencyConverter initialData={currentConversionData} />
               <TouchableOpacity
                 style={styles.hideButton}
-                onPress={() => setShowCurrencyConverter(false)}
+                onPress={() => {
+                  setShowCurrencyConverter(false);
+                  setCurrentConversionData(null);
+                }}
               >
                 <Text style={styles.hideButtonText}>Hide Converter</Text>
               </TouchableOpacity>
