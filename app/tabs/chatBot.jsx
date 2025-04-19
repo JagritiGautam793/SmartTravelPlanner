@@ -1,46 +1,191 @@
 import { generateAPIUrl } from "@/utils";
 import { useChat } from "@ai-sdk/react";
 import { fetch as expoFetch } from "expo/fetch";
-import { View, TextInput, ScrollView, Text, SafeAreaView } from "react-native";
+import {
+  View,
+  TextInput,
+  ScrollView,
+  Text,
+  SafeAreaView,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { useState, useRef, useEffect } from "react";
+import CurrencyConverter from "../../components/CurrencyConvertor";
 
-export default function App() {
-  const { messages, error, handleInputChange, input, handleSubmit } = useChat({
+export default function ChatBot() {
+  const [showCurrencyConverter, setShowCurrencyConverter] = useState(false);
+  const scrollViewRef = useRef(null);
+
+  const {
+    messages,
+    error,
+    handleInputChange,
+    input,
+    handleSubmit,
+    append,
+    isLoading,
+  } = useChat({
     fetch: expoFetch,
     api: generateAPIUrl("/api/chat"),
     onError: (error) => console.error(error, "ERROR"),
+    onFinish: (message) => {
+      // Check if this is a currency conversion response
+      if (message && message.type === "currency_conversion") {
+        setShowCurrencyConverter(true);
+
+        // Add the message explaining the currency converter
+        append({
+          role: "assistant",
+          content:
+            message.message || "Here's a currency converter you can use:",
+        });
+      }
+    },
+    onResponse: async (response) => {
+      // For non-streaming responses, we need to parse the JSON
+      const contentType = response.headers.get("content-type") || "";
+
+      if (contentType.includes("application/json")) {
+        try {
+          const data = await response.json();
+
+          if (data.type === "currency_conversion") {
+            setShowCurrencyConverter(true);
+
+            // Return the data so onFinish can use it
+            return data;
+          }
+        } catch (e) {
+          console.error("Failed to parse JSON response:", e);
+        }
+      }
+
+      // For streaming responses, continue normally
+      return response;
+    },
   });
 
-  if (error) return <Text>{error.message}</Text>;
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      setTimeout(() => {
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }, 100); // Small delay to ensure content is rendered
+    }
+  }, [messages, showCurrencyConverter]);
+
+  // Function to handle user request for currency conversion
+  const handleCurrencyRequest = () => {
+    // Check if the current input is about currency conversion
+    const currencyPatterns = [
+      /convert\s+currency/i,
+      /currency\s+convert(er|or)/i,
+      /exchange\s+rate/i,
+      /currency/i,
+      /exchange/i,
+      /convert/i,
+    ];
+
+    const isCurrencyRequest = currencyPatterns.some((pattern) =>
+      pattern.test(input)
+    );
+
+    if (isCurrencyRequest) {
+      // Add user message
+      append({
+        role: "user",
+        content: input,
+      });
+
+      // Clear input
+      handleInputChange({ target: { value: "" } });
+
+      // Show currency converter directly
+      setShowCurrencyConverter(true);
+
+      // Add assistant message
+      append({
+        role: "assistant",
+        content: "Here's a currency converter you can use:",
+      });
+
+      return true;
+    }
+
+    return false;
+  };
+
+  // Modified submit handler
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+
+    // If it's a currency request, handle it client-side
+    if (!handleCurrencyRequest()) {
+      // Otherwise, use the normal submit handler
+      handleSubmit(e);
+    }
+  };
+
+  if (error) return <Text style={styles.errorText}>{error.message}</Text>;
 
   return (
-    <SafeAreaView style={{ height: "100vh" }}>
-      <View
-        style={{
-          height: "95%",
-          display: "flex",
-          flexDirection: "column",
-          paddingHorizontal: 8,
-        }}
-      >
-        <ScrollView style={{ flex: 1 }}>
-          {messages.map((m) => (
-            <View key={m.id} style={{ marginVertical: 8 }}>
-              <View>
-                <Text style={{ fontWeight: 700 }}>{m.role}</Text>
-                {m.toolInvocations ? (
-                  <Text>{JSON.stringify(m.toolInvocations, null, 2)}</Text>
-                ) : (
-                  <Text>{m.content}</Text>
-                )}
-              </View>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.chatContainer}>
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.messagesContainer}
+          contentContainerStyle={styles.messagesContent}
+        >
+          {messages.map((m, index) => (
+            <View
+              key={index}
+              style={[
+                styles.messageBox,
+                m.role === "user"
+                  ? styles.userMessage
+                  : styles.assistantMessage,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.messageText,
+                  m.role === "user"
+                    ? styles.userMessageText
+                    : styles.assistantMessageText,
+                ]}
+              >
+                {m.content}
+              </Text>
             </View>
           ))}
+
+          {isLoading && (
+            <View style={[styles.messageBox, styles.assistantMessage]}>
+              <Text style={[styles.messageText, styles.assistantMessageText]}>
+                ...
+              </Text>
+            </View>
+          )}
+
+          {/* Show Currency Converter if user asks for it */}
+          {showCurrencyConverter && (
+            <View style={styles.converterContainer}>
+              <CurrencyConverter />
+              <TouchableOpacity
+                style={styles.hideButton}
+                onPress={() => setShowCurrencyConverter(false)}
+              >
+                <Text style={styles.hideButtonText}>Hide Converter</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </ScrollView>
 
-        <View style={{ marginTop: 8 }}>
+        <View style={styles.inputContainer}>
           <TextInput
-            style={{ backgroundColor: "white", padding: 8 }}
-            placeholder="Say something..."
+            style={styles.input}
+            placeholder="Type a message..."
             value={input}
             onChange={(e) =>
               handleInputChange({
@@ -51,14 +196,107 @@ export default function App() {
                 },
               })
             }
-            onSubmitEditing={(e) => {
-              handleSubmit(e);
-              e.preventDefault();
-            }}
-            autoFocus={true}
+            onSubmitEditing={handleFormSubmit}
           />
+
+          <TouchableOpacity
+            style={styles.sendButton}
+            onPress={handleFormSubmit}
+            disabled={isLoading || !input.trim()}
+          >
+            <Text style={styles.sendButtonText}>Send</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f7fa",
+  },
+  chatContainer: {
+    flex: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+  },
+  messagesContainer: {
+    flex: 1,
+  },
+  messagesContent: {
+    paddingVertical: 8,
+  },
+  messageBox: {
+    maxWidth: "80%",
+    padding: 12,
+    borderRadius: 12,
+    marginVertical: 4,
+  },
+  userMessage: {
+    alignSelf: "flex-end",
+    backgroundColor: "#3498db",
+  },
+  assistantMessage: {
+    alignSelf: "flex-start",
+    backgroundColor: "#e5e5e5",
+  },
+  messageText: {
+    fontSize: 16,
+  },
+  userMessageText: {
+    color: "white",
+  },
+  assistantMessageText: {
+    color: "#333",
+  },
+  converterContainer: {
+    marginVertical: 8,
+    width: "100%",
+  },
+  inputContainer: {
+    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: "white",
+    padding: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    fontSize: 16,
+  },
+  sendButton: {
+    backgroundColor: "#3498db",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  sendButtonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  hideButton: {
+    backgroundColor: "#3498db",
+    padding: 8,
+    borderRadius: 8,
+    marginTop: 8,
+    alignSelf: "center",
+  },
+  hideButtonText: {
+    color: "white",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  errorText: {
+    color: "red",
+    padding: 16,
+    textAlign: "center",
+  },
+});
