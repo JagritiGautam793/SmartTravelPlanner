@@ -27,7 +27,7 @@ export default function Login() {
     >
       {variant === "filled" ? (
         <LinearGradient
-          colors={["rgba(0,0,0,0.6)", "rgba(0,0,0,0.8)"]}
+          colors={["rgba(192, 78, 8, 0.6)", "rgba(248, 157, 88, 0.8)"]}
           style={styles.gradientButton}
         >
           <Text style={styles.buttonTextFilled}>{title}</Text>
@@ -43,7 +43,7 @@ export default function Login() {
       {/* Background Video */}
       <Video
         source={{
-          uri: "https://videos.pexels.com/video-files/8045117/8045117-sd_360_640_25fps.mp4",
+          uri: "https://videos.pexels.com/video-files/29401274/12663038_1440_2560_30fps.mp4",
         }}
         style={styles.backgroundVideo}
         resizeMode="cover"
@@ -74,7 +74,7 @@ export default function Login() {
         <View style={styles.footer}>
           <Button
             title="Get Started"
-            variant="outline"
+            variant="filled"
             onPress={() => router.push("/auth/signIn")}
           />
         </View>
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   },
   button: {
     width: "100%",
-    borderRadius: 15,
+    borderRadius: 35,
     overflow: "hidden",
     marginTop: 20,
   },
