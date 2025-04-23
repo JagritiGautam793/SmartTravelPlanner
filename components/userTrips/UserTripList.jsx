@@ -153,54 +153,6 @@ export default function UserTripList({ userTrips }) {
     );
   };
 
-  const renderPaginationDots = () => {
-    return (
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-          marginTop: 15,
-        }}
-      >
-        {sortedTrips.map((_, index) => {
-          const inputRange = [
-            (index - 1) * (CARD_WIDTH + SPACING),
-            index * (CARD_WIDTH + SPACING),
-            (index + 1) * (CARD_WIDTH + SPACING),
-          ];
-
-          const scale = scrollX.interpolate({
-            inputRange,
-            outputRange: [1, 1.5, 1],
-            extrapolate: "clamp",
-          });
-
-          const opacity = scrollX.interpolate({
-            inputRange,
-            outputRange: [0.3, 1, 0.3],
-            extrapolate: "clamp",
-          });
-
-          return (
-            <Animated.View
-              key={index}
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: 4,
-                backgroundColor: "#000",
-                marginHorizontal: 4,
-                opacity,
-                transform: [{ scale }],
-              }}
-            />
-          );
-        })}
-      </View>
-    );
-  };
-
   return (
     <View style={{ flex: 1 }}>
       <WeatherDetails />
@@ -221,7 +173,6 @@ export default function UserTripList({ userTrips }) {
         >
           {sortedTrips.map((trip, index) => renderTripCard(trip, index))}
         </Animated.ScrollView>
-        {renderPaginationDots()}
       </View>
     </View>
   );

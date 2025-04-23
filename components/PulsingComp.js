@@ -34,7 +34,7 @@ export default function ChatBotFloatingButton({ onPress, size = 60 }) {
       activeOpacity={0.8}
       style={{
         position: "absolute",
-        bottom: 20,
+        bottom: 70,
         right: 20,
         zIndex: 1000,
       }}

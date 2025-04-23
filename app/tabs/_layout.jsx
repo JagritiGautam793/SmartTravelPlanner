@@ -19,13 +19,7 @@ export default function TabLayout() {
           headerShown: false,
         }}
       />
-      <Tabs.Screen
-        name="chatBot"
-        options={{
-          title: "Chat",
-          headerShown: false,
-        }}
-      />
+
       <Tabs.Screen
         name="profile"
         options={{

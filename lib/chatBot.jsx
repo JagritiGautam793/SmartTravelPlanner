@@ -11,7 +11,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
-import CurrencyConverter from "../../components/CurrencyConvertor";
+import CurrencyConverter from "../components/CurrencyConvertor";
 
 export default function ChatBot() {
   const [showCurrencyConverter, setShowCurrencyConverter] = useState(false);

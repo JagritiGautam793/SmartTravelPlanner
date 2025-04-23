@@ -140,6 +140,7 @@ const PulsingButton = ({ onPress, size = 42, iconSize = 16 }) => {
             left: -6,
             top: -6,
             transform: [{ scale: pulseAnim }],
+            marginBottom: 50,
           }}
         />
 

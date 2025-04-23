@@ -263,6 +263,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f7fa",
     borderRadius: 20,
     overflow: "hidden",
+    marginBottom: 10,
   },
   header: {
     flexDirection: "row",

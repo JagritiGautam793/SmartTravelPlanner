@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: PRIMARY_COLOR,
-    width: "80%",
+    width: "70%",
     alignSelf: "center",
     bottom: 10,
     borderRadius: 40,
