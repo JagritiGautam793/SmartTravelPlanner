@@ -1,10 +1,9 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 export default function FlightsInfo({ flightData }) {
-  if (!flightData) {
-    return null;
-  }
+  if (!flightData) return null;
 
   const arrivalPrice = flightData.arrivalFlight?.flightPrice || 0;
   const departurePrice = flightData.departureFlight?.flightPrice || 0;
@@ -12,83 +11,183 @@ export default function FlightsInfo({ flightData }) {
   const arrivalFlight = flightData.arrivalFlight?.airline || "Not mentioned";
   const departureFlight =
     flightData.departureFlight?.airline || "Not mentioned";
-
   const totalPrice = arrivalPrice + departurePrice + transferPrice;
 
   return (
-    <View style={styles.card}>
-      {/* Total Price Section */}
-      <View style={styles.header}>
-        <Text style={styles.priceText}>
-          Flight Total: <Text style={styles.priceAmount}>${totalPrice}</Text>
-        </Text>
-        <TouchableOpacity style={styles.bookButton}>
-          <Text style={styles.bookButtonText}>Book Here</Text>
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <View style={styles.headerContainer}>
+        <View style={styles.iconContainer}>
+          <FontAwesome5 name="plane" size={18} color="#FF8C00" />
+        </View>
+        <Text style={styles.title}>Flight Details</Text>
       </View>
 
-      {/* Flight Details */}
-      <View style={styles.flightDetails}>
-        <Text style={styles.detailText}>
-          ✈ <Text style={styles.boldText}>Arrival Flight:</Text> {arrivalFlight}
-        </Text>
-        <Text style={styles.detailText}>
-          🛫 <Text style={styles.boldText}>Departure Flight:</Text>{" "}
-          {departureFlight}
-        </Text>
+      <View style={styles.card}>
+        <View style={styles.priceHeader}>
+          <View>
+            <Text style={styles.priceLabel}>Total Flight Cost</Text>
+            <Text style={styles.totalPrice}>${totalPrice}</Text>
+          </View>
+          <TouchableOpacity style={styles.bookButton}>
+            <Text style={styles.bookButtonText}>Book Flights</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.flightDetailsContainer}>
+          <View style={styles.flightDetail}>
+            <View style={styles.flightIcon}>
+              <FontAwesome5 name="plane-arrival" size={16} color="#4CAF50" />
+            </View>
+            <View style={styles.flightInfo}>
+              <Text style={styles.flightLabel}>Arrival Flight</Text>
+              <Text style={styles.flightValue}>
+                {arrivalFlight} - ${arrivalPrice}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.divider} />
+
+          <View style={styles.flightDetail}>
+            <View style={styles.flightIcon}>
+              <FontAwesome5 name="plane-departure" size={16} color="#F44336" />
+            </View>
+            <View style={styles.flightInfo}>
+              <Text style={styles.flightLabel}>Departure Flight</Text>
+              <Text style={styles.flightValue}>
+                {departureFlight} - ${departurePrice}
+              </Text>
+            </View>
+          </View>
+
+          {transferPrice > 0 && (
+            <>
+              <View style={styles.divider} />
+              <View style={styles.flightDetail}>
+                <View style={styles.flightIcon}>
+                  <FontAwesome5 name="shuttle-van" size={16} color="#2196F3" />
+                </View>
+                <View style={styles.flightInfo}>
+                  <Text style={styles.flightLabel}>Airport Transfer</Text>
+                  <Text style={styles.flightValue}>${transferPrice}</Text>
+                </View>
+              </View>
+            </>
+          )}
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    marginVertical: 25,
+  },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "rgba(255, 140, 0, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#2D3436",
+  },
   card: {
     backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 10,
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 20,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 3.84,
     elevation: 5,
-    marginVertical: 20,
-    marginHorizontal: 10,
   },
-  header: {
+  priceHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 20,
   },
-  priceText: {
-    fontSize: 18,
-    fontWeight: "600",
+  priceLabel: {
+    fontSize: 14,
+    color: "#95A5A6",
+    marginBottom: 4,
   },
-  priceAmount: {
-    fontWeight: "bold",
-    color: "#27ae60",
+  totalPrice: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#2D3436",
   },
   bookButton: {
-    backgroundColor: "#3498db",
+    backgroundColor: "#FF8C00",
+    paddingHorizontal: 20,
     paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 8,
+    borderRadius: 25,
   },
   bookButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    textAlign: "center",
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
   },
-  flightDetails: {
-    marginTop: 10,
+  flightDetailsContainer: {
+    backgroundColor: "#F8F9FA",
+    borderRadius: 12,
+    padding: 16,
   },
-  detailText: {
+  flightDetail: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+  flightIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  flightInfo: {
+    flex: 1,
+  },
+  flightLabel: {
+    fontSize: 14,
+    color: "#95A5A6",
+    marginBottom: 4,
+  },
+  flightValue: {
     fontSize: 16,
-    color: "#555",
-    marginVertical: 5,
+    color: "#2D3436",
+    fontWeight: "500",
   },
-  boldText: {
-    fontWeight: "bold",
-    color: "#333",
+  divider: {
+    height: 1,
+    backgroundColor: "#E0E0E0",
+    marginVertical: 8,
   },
 });

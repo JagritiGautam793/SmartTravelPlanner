@@ -5,20 +5,15 @@ import {
   TextInput,
   TouchableOpacity,
   SafeAreaView,
-  ImageBackground,
-  Dimensions,
-  ToastAndroid,
+  Image,
   StyleSheet,
+  ScrollView,
 } from "react-native";
 import { useNavigation, useRouter } from "expo-router";
-import { BlurView } from "expo-blur";
-import { LinearGradient } from "expo-linear-gradient";
-import { createUserWithEmailAndPassword } from "firebase/auth"; // Ensure this import is present
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { auth } from "../../../configs/FirebaseConfig";
 import Toast from "react-native-toast-message";
-
-const { width, height } = Dimensions.get("window");
 
 export default function SignUp() {
   const navigation = useNavigation();
@@ -42,177 +37,241 @@ export default function SignUp() {
         style: styles.toastError,
         textStyle: styles.toastText,
       });
-
       return;
     }
 
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        // Signed up
         const user = userCredential.user;
         console.log(user);
         router.replace("/tabs/mytrip");
-        // Navigate to the next screen or show success message
       })
       .catch((error) => {
         const errorMessage = error.message;
         console.log(errorMessage);
-        // Show error message to user if needed
       });
   };
 
   return (
-    <ImageBackground
-      source={require("../../../assets/images/back.jpg")}
-      style={styles.backgroundImage}
-    >
+    <View style={styles.container}>
       <Toast />
-      <SafeAreaView style={styles.container}>
-        <BlurView intensity={10} tint="light" style={styles.blurContainer}>
-          <LinearGradient
-            colors={["rgba(255,255,255,0.5)", "rgba(255,255,255,0.5)"]}
-            style={styles.gradient}
-          >
-            <View style={styles.content}>
-              {/* <TouchableOpacity onPress={() => router.back()}>
-                <AntDesign name="arrowleft" size={24} color="black" />
-              </TouchableOpacity> */}
-              <Text style={styles.title}>Set Up Account</Text>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Full Name</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter Full Name"
-                  onChangeText={(value) => setFullName(value)}
-                  placeholderTextColor="rgba(0, 0, 0, 0.5)"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Email</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter Email"
-                  onChangeText={(value) => setEmail(value)}
-                  placeholderTextColor="rgba(0, 0, 0, 0.5)"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Password</Text>
-                <TextInput
-                  secureTextEntry={true}
-                  style={styles.input}
-                  placeholder="Enter Password"
-                  onChangeText={(value) => setPassword(value)} // Corrected line
-                  placeholderTextColor="rgba(0, 0, 0, 0.5)"
-                />
-              </View>
-
-              <TouchableOpacity
-                onPress={onCreateAccount}
-                style={styles.signInButton}
-              >
-                <LinearGradient
-                  colors={["rgba(0,0,0,0.6)", "rgba(0,0,0,0.8)"]}
-                  style={styles.signInGradient}
-                >
-                  <Text style={styles.signInButtonText}>Create Account</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => router.replace("auth/signIn")}
-                style={styles.createAccountButton}
-              >
-                <Text style={styles.createAccountButtonText}>Sign In</Text>
-              </TouchableOpacity>
-            </View>
-          </LinearGradient>
-        </BlurView>
+      <SafeAreaView style={styles.header}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
+          <AntDesign name="arrowleft" size={20} color="black" />
+        </TouchableOpacity>
+        <View style={styles.imageContainer}>
+          <Image
+            source={{
+              uri: "https://images.unsplash.com/photo-1496614932623-0a3a9743552e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            }}
+            style={styles.loginImage}
+          />
+        </View>
       </SafeAreaView>
-    </ImageBackground>
+
+      <View style={styles.formContainer}>
+        <ScrollView style={styles.form} showsVerticalScrollIndicator={false}>
+          <Text style={styles.label}>Full Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Full Name"
+            onChangeText={(value) => setFullName(value)}
+            placeholderTextColor="rgba(0, 0, 0, 0.5)"
+          />
+
+          <Text style={styles.label}>Email Address</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Email"
+            onChangeText={(value) => setEmail(value)}
+            placeholderTextColor="rgba(0, 0, 0, 0.5)"
+          />
+
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            secureTextEntry={true}
+            style={styles.input}
+            placeholder="Enter Password"
+            onChangeText={(value) => setPassword(value)}
+            placeholderTextColor="rgba(0, 0, 0, 0.5)"
+          />
+
+          <TouchableOpacity
+            onPress={onCreateAccount}
+            style={styles.signUpButton}
+          >
+            <Text style={styles.signUpButtonText}>Sign Up</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.orText}>Or</Text>
+
+          <View style={styles.socialLogin}>
+            <TouchableOpacity style={styles.googleButton}>
+              <AntDesign name="google" size={24} color="black" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.signInContainer}>
+            <Text style={styles.signInText}>Already have an account?</Text>
+            <TouchableOpacity onPress={() => router.replace("auth/signIn")}>
+              <Text style={styles.signInLink}>Login</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    width: width,
-    height: height,
-  },
   container: {
     flex: 1,
+    backgroundColor: "#ffffff",
   },
-  blurContainer: {
-    flex: 1,
+  header: {
+    flex: 0.35,
+  },
+  backButton: {
+    padding: 8,
+    margin: 16,
+    borderRadius: 12,
+    backgroundColor: "white",
+    width: 40,
+    height: 40,
+    alignItems: "center",
     justifyContent: "center",
-    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
-  gradient: {
-    borderRadius: 30,
-    overflow: "hidden",
+  imageContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  content: {
-    padding: 25,
+  loginImage: {
+    width: 420,
+    height: 470,
+    resizeMode: "cover",
   },
-  title: {
-    fontWeight: "bold",
-    fontSize: 32,
-    color: "#333333",
-    marginBottom: 25,
-    textShadowColor: "rgba(255, 255, 255, 0.5)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
+  formContainer: {
+    flex: 0.65,
+    backgroundColor: "white",
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
+    paddingHorizontal: 32,
+    paddingTop: 32,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: -3,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5,
   },
-  inputContainer: {
-    marginBottom: 10,
+  form: {
+    flex: 1,
   },
   label: {
-    fontSize: 16,
     color: "#333333",
+    marginLeft: 16,
     marginBottom: 8,
+    fontSize: 16,
     fontWeight: "600",
   },
   input: {
-    padding: 15,
-    borderRadius: 15,
+    backgroundColor: "#ffffff",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 16,
     fontSize: 16,
-    color: "#333333",
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  signInButton: {
-    marginTop: 40,
-    overflow: "hidden",
-    borderRadius: 15,
+  signUpButton: {
+    backgroundColor: "#FF8C00",
+    padding: 16,
+    borderRadius: 16,
+    alignItems: "center",
+    shadowColor: "#FF8C00",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 6,
+    marginTop: 8,
   },
-  signInGradient: {
-    padding: 18,
-  },
-  signInButtonText: {
-    textAlign: "center",
-    color: "#FFFFFF",
+  signUpButtonText: {
+    color: "white",
     fontSize: 18,
     fontWeight: "bold",
   },
-  createAccountButton: {
-    padding: 18,
-    marginTop: 20,
-  },
-  createAccountButtonText: {
-    textAlign: "center",
+  orText: {
+    fontSize: 20,
     color: "#333333",
-    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  socialLogin: {
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  googleButton: {
+    padding: 12,
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  signInContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 28,
+    marginBottom: 20,
+  },
+  signInText: {
+    color: "#333333",
+  },
+  signInLink: {
+    color: "#FF8C00",
     fontWeight: "600",
+    marginLeft: 4,
   },
   toastError: {
-    backgroundColor: "black", // Set background to black
+    backgroundColor: "black",
     padding: 10,
     borderRadius: 10,
   },
   toastText: {
-    color: "white", // Set text color to white
+    color: "white",
     fontSize: 16,
   },
 });

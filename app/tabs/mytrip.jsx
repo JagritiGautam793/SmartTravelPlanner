@@ -20,6 +20,8 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import PulsingComp from "../../components/PulsingComp";
+import ChatBotModal from "../../components/ChatbotModal";
 
 // Updated PulsingButton with improved layout and styling
 const PulsingButton = ({ onPress, size = 42, iconSize = 16 }) => {
@@ -176,6 +178,7 @@ export default function MyTrip() {
   const [userTrips, setUserTrips] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [isChatVisible, setIsChatVisible] = useState(false);
   const user = auth.currentUser;
   const router = useRouter();
 
@@ -529,6 +532,14 @@ export default function MyTrip() {
           )}
         </View>
       </ScrollView>
+
+      <PulsingComp onPress={() => setIsChatVisible(true)} />
+      <ChatBotModal
+        visible={isChatVisible}
+        onClose={() => setIsChatVisible(false)}
+      />
+
+      {/* ChatBot Components - Moved outside of ScrollView */}
     </View>
   );
 }
