@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { chatSession } from "../../configs/geminiReco";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { FontAwesome } from "@expo/vector-icons";
 
 const categories = [
   {
@@ -51,18 +53,14 @@ const categories = [
 
 const RECOMMENDATION_PROMPT = `
 Generate top travel recommendations based on the selected category: {selectedCategory}.
-
 Provide a mix of:
 - Global Recommendations: Top destinations worldwide known for {selectedCategory} experiences.
 - Local Recommendations: Popular and highly-rated places specifically in India that are known for {selectedCategory} experiences.
-
 For each recommendation, include a specific reason highlighting the unique {selectedCategory} experience at that destination:
 - If the category is "Beach," emphasize the specific beaches, water clarity, sand quality, and water activities.
 - If the category is "Mountain," highlight specific peaks, scenic views, trekking routes, and mountain experiences.
 - If the category is "Camp," mention specific camping grounds, nature trails, wildlife, and outdoor experiences.
-
 Make each recommendation highly specific to the {selectedCategory} category, not just generic tourist information.
-
 Return 10-12 concise suggestions per scope with only the destination name and a brief reason for the recommendation specific to the category.
 Return ONLY a JSON object with the following structure, and no other text or explanation:
 {
@@ -83,9 +81,11 @@ Return ONLY a JSON object with the following structure, and no other text or exp
     ]
   }
 }
-
 Ensure the JSON is properly formatted with no trailing commas.
 `;
+
+const CACHE_KEY_PREFIX = "category_recommendations_";
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 // Modified function to fetch category-specific photo reference for a place
 export const GetPhotoRef = async (placeName, category) => {
@@ -179,16 +179,34 @@ export default function CategoriesRe({ onCategorySelect, selectedCategory }) {
     setDebugText(`Selected category: ${selectedCategory || "none"}`);
 
     if (selectedCategory) {
-      GenerateCategory();
+      GenerateCategory(false);
     }
   }, [selectedCategory]);
 
-  const GenerateCategory = async () => {
+  const GenerateCategory = async (forceFetch = false) => {
     setLoading(true);
     setDebugText(`Loading recommendations for ${selectedCategory}...`);
     console.log("Starting to generate recommendations for:", selectedCategory);
 
     try {
+      const cacheKey = `${CACHE_KEY_PREFIX}${selectedCategory}`;
+
+      // Check cache first if not forcing a fetch
+      if (!forceFetch) {
+        const cached = await AsyncStorage.getItem(cacheKey);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          const now = Date.now();
+          if (now - timestamp < CACHE_EXPIRY) {
+            setRecommendations(data);
+            // Fetch photos for cached recommendations
+            await fetchPhotosForRecommendations(data);
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
       // Replace all placeholders in the prompt with the actual selected category
       const FP = RECOMMENDATION_PROMPT.replace(
         /{selectedCategory}/g,
@@ -206,27 +224,47 @@ export default function CategoriesRe({ onCategorySelect, selectedCategory }) {
       if (jsonMatch) {
         const parsedResponse = JSON.parse(jsonMatch[0]);
         setRecommendations(parsedResponse);
+
+        // Cache the new recommendations
+        await AsyncStorage.setItem(
+          cacheKey,
+          JSON.stringify({
+            data: parsedResponse,
+            timestamp: Date.now(),
+          })
+        );
+
+        // Fetch photos for new recommendations
+        await fetchPhotosForRecommendations(parsedResponse);
+
         setDebugText("Data successfully parsed from API");
         console.log(
           "Parsed response:",
           JSON.stringify(parsedResponse, null, 2)
         );
-
-        // Fetch photos for all recommendations
-        fetchPhotosForRecommendations(parsedResponse);
       } else {
         // If no JSON pattern found, try parsing the whole response
         try {
           const parsedResponse = JSON.parse(responseText);
           setRecommendations(parsedResponse);
+
+          // Cache the new recommendations
+          await AsyncStorage.setItem(
+            cacheKey,
+            JSON.stringify({
+              data: parsedResponse,
+              timestamp: Date.now(),
+            })
+          );
+
+          // Fetch photos for new recommendations
+          await fetchPhotosForRecommendations(parsedResponse);
+
           setDebugText("Data successfully parsed from API (whole response)");
           console.log(
             "Parsed response:",
             JSON.stringify(parsedResponse, null, 2)
           );
-
-          // Fetch photos for all recommendations
-          fetchPhotosForRecommendations(parsedResponse);
         } catch (parseError) {
           console.error("Error parsing JSON response:", parseError);
           setDebugText(`Error parsing: ${parseError.message}`);
@@ -317,7 +355,19 @@ export default function CategoriesRe({ onCategorySelect, selectedCategory }) {
       <View style={styles.categoriesSection}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Categories</Text>
-          <Text style={styles.seeAllText}>See all</Text>
+          {selectedCategory && (
+            <TouchableOpacity
+              style={styles.shuffleButton}
+              onPress={() => GenerateCategory(true)}
+              disabled={loading}
+            >
+              <FontAwesome
+                name="refresh"
+                size={20}
+                color={loading ? "#999" : "#0066cc"}
+              />
+            </TouchableOpacity>
+          )}
         </View>
         <ScrollView
           horizontal
@@ -613,5 +663,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#666",
     textAlign: "center",
+  },
+  shuffleButton: {
+    padding: 10,
+    borderRadius: 20,
+    backgroundColor: "#f0f0f0",
   },
 });

@@ -4,12 +4,18 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { auth, db } from "../../configs/FirebaseConfig";
 import { CreateTripContext } from "../../context/CreateTripContext";
 import { chatSession } from "../../configs/GenRecomm";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { FontAwesome } from "@expo/vector-icons";
+
+const CACHE_KEY = "travel_recommendations_cache";
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 export default function Recomm() {
   const { tripData, setTripData } = useContext(CreateTripContext);
@@ -20,59 +26,72 @@ export default function Recomm() {
   });
   const user = auth.currentUser;
 
-  const GenerateRecommendation = async (trips = userTrips) => {
+  const GenerateRecommendation = async (
+    trips = userTrips,
+    forceFetch = false
+  ) => {
     setLoading(true);
-    // Collect details from past trips (locations and names)
-    const locations = trips
-      .map((trip) => trip.tripPlan?.location)
-      .filter((location) => location) // Filter out undefined/null locations
-      .join(", ");
-    const tripNames = trips
-      .map((trip) => trip.tripName)
-      .filter((name) => name) // Filter out undefined/null names
-      .join(", ");
 
-    // Construct the prompt with explicit JSON structure request
-    const FINAL_REC_PROMPT = `Based on the user's past trips (Locations: ${locations}, Trip Names: ${tripNames}), suggest 5-6 new destinations. 
-
-    Return ONLY a JSON object with the following structure, and no other text or explanation:
-    {
-      "recommendations": [
-        {
-          "destination": "City/Region Name, Country",
-          "reason": "A short paragraph explaining why this destination fits the user's preferences based on past trips",
-          "activities": ["Activity 1", "Activity 2", "Activity 3", "Activity 4"]
-        },
-        ... more destination objects
-      ]
-    }
-    
-    Each destination should include exactly 4 activities. Ensure the JSON is properly formatted with no trailing commas.`;
-
-    // Log the generated prompt to the console
-    console.log("Generated Recommendation Prompt:", FINAL_REC_PROMPT);
     try {
-      const result = await chatSession.sendMessage(FINAL_REC_PROMPT);
-      console.log("Jagfr", result.response.text());
-
-      // Parse the JSON response
-      try {
-        // Try to parse the text response as JSON
-        let responseText = result.response.text();
-
-        // Try to extract JSON if there's additional text
-        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          responseText = jsonMatch[0];
+      // Check cache first if not forcing a fetch
+      if (!forceFetch) {
+        const cached = await AsyncStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          const now = Date.now();
+          if (now - timestamp < CACHE_EXPIRY) {
+            setRecommendations(data);
+            setLoading(false);
+            return;
+          }
         }
-
-        const parsedResponse = JSON.parse(responseText);
-        setRecommendations(parsedResponse);
-      } catch (parseError) {
-        console.error("Error parsing AI response as JSON:", parseError);
-        // Fallback to empty recommendations if parsing fails
-        setRecommendations({ recommendations: [] });
       }
+
+      // Collect details from past trips (locations and names)
+      const locations = trips
+        .map((trip) => trip.tripPlan?.location)
+        .filter((location) => location)
+        .join(", ");
+      const tripNames = trips
+        .map((trip) => trip.tripName)
+        .filter((name) => name)
+        .join(", ");
+
+      const FINAL_REC_PROMPT = `Based on the user's past trips (Locations: ${locations}, Trip Names: ${tripNames}), suggest 5-6 new destinations. 
+
+      Return ONLY a JSON object with the following structure, and no other text or explanation:
+      {
+        "recommendations": [
+          {
+            "destination": "City/Region Name, Country",
+            "reason": "A short paragraph explaining why this destination fits the user's preferences based on past trips",
+            "activities": ["Activity 1", "Activity 2", "Activity 3", "Activity 4"]
+          },
+          ... more destination objects
+        ]
+      }
+      
+      Each destination should include exactly 4 activities. Ensure the JSON is properly formatted with no trailing commas.`;
+
+      const result = await chatSession.sendMessage(FINAL_REC_PROMPT);
+      let responseText = result.response.text();
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        responseText = jsonMatch[0];
+      }
+
+      const parsedResponse = JSON.parse(responseText);
+
+      // Cache the new recommendations
+      await AsyncStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({
+          data: parsedResponse,
+          timestamp: Date.now(),
+        })
+      );
+
+      setRecommendations(parsedResponse);
     } catch (error) {
       console.error("Error generating recommendations:", error);
       setRecommendations({ recommendations: [] });
@@ -83,7 +102,7 @@ export default function Recomm() {
 
   useEffect(() => {
     if (user) fetchTrips();
-  }, [user]); // Fetch when user is available
+  }, [user]);
 
   const fetchTrips = async () => {
     try {
@@ -100,11 +119,10 @@ export default function Recomm() {
       });
 
       console.log("Fetched Trips for recommendation:", trips);
-      setUserTrips(trips); // ✅ Update state inside Recomm
+      setUserTrips(trips);
 
-      // Call GenerateRecommendation with the fetched trips
       if (trips.length > 0) {
-        GenerateRecommendation(trips); // Now passing trips correctly
+        GenerateRecommendation(trips);
       }
     } catch (error) {
       console.error("Error fetching trips:", error);
@@ -123,14 +141,26 @@ export default function Recomm() {
 
   return (
     <View style={{ flex: 1, padding: 20 }}>
-      <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>
-        Recommended Destinations
-      </Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerTitle}>Recommended Destinations</Text>
+        <TouchableOpacity
+          style={styles.shuffleButton}
+          onPress={() => GenerateRecommendation(userTrips, true)}
+          disabled={loading}
+        >
+          <FontAwesome
+            name="refresh"
+            size={20}
+            color={loading ? "#999" : "#0066cc"}
+          />
+        </TouchableOpacity>
+      </View>
 
       {loading ? (
-        <Text style={{ textAlign: "center", marginTop: 20 }}>
-          Loading recommendations...
-        </Text>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0066cc" />
+          <Text style={styles.loadingText}>Loading recommendations...</Text>
+        </View>
       ) : recommendations.recommendations &&
         recommendations.recommendations.length > 0 ? (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -173,7 +203,7 @@ export default function Recomm() {
           ))}
         </ScrollView>
       ) : (
-        <Text style={{ textAlign: "center", marginTop: 20 }}>
+        <Text style={styles.noDataText}>
           {userTrips.length > 0
             ? "No recommendations available. Try again later."
             : "No past trips found. Add some trips to get recommendations."}
@@ -259,5 +289,38 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 12,
     fontStyle: "italic",
+  },
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  shuffleButton: {
+    padding: 10,
+    borderRadius: 20,
+    backgroundColor: "#f0f0f0",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  loadingText: {
+    marginTop: 10,
+    color: "#666",
+    fontSize: 16,
+  },
+  noDataText: {
+    textAlign: "center",
+    marginTop: 20,
+    color: "#666",
+    fontSize: 16,
   },
 });
