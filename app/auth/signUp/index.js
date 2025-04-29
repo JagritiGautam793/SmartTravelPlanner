@@ -56,12 +56,12 @@ export default function SignUp() {
     <View style={styles.container}>
       <Toast />
       <SafeAreaView style={styles.header}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => router.back()}
           style={styles.backButton}
         >
           <AntDesign name="arrowleft" size={20} color="black" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <View style={styles.imageContainer}>
           <Image
             source={{

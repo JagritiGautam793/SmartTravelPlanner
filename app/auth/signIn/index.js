@@ -54,12 +54,12 @@ export default function SignIn() {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.header}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
           <AntDesign name="arrowleft" size={20} color="black" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <View style={styles.imageContainer}>
           <Image
             source={{

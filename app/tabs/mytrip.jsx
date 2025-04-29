@@ -564,7 +564,6 @@ export default function MyTrip() {
           <SectionHeader
             title="Your Voyages"
             showViewAll={userTrips.length > 3}
-            onViewAllPress={() => {}}
           />
 
           {isLoading ? (
