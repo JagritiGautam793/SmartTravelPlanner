@@ -1,50 +1,212 @@
-# Welcome to your Expo app 👋
+# Smart Travel Planner
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Overview
 
-## Get started
+Smart Travel Planner is a sophisticated mobile application that revolutionizes the travel planning experience through artificial intelligence and real-time capabilities. Built with React Native and Expo, it combines cutting-edge AI technology with intuitive user interfaces to deliver personalized travel solutions.
 
-1. Install dependencies
+## Core Features
 
-   ```bash
-   npm install
-   ```
+### Intelligent Travel Planning
 
-2. Start the app
+- Smart destination discovery powered by Google's Generative AI
+- AI-driven personalized itinerary generation
+- Multi-stage trip planning workflow
+- Dynamic budget optimization
+- Comprehensive travel preferences management
+- Category-based destination recommendations
 
-   ```bash
-    npx expo start
-   ```
+### Location Intelligence & Mapping
 
-In the output, you'll find options to open the app in a
+- Real-time location tracking and geofencing
+- Interactive mapping with react-native-maps
+- Proximity-based place discovery
+- Detailed place information and photos
+- Google Places API integration
+- Custom location markers and routes
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Smart Assistant
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- AI-powered conversational interface
+- Real-time response streaming
+- Multi-currency conversion support
+- Contextual travel recommendations
+- Natural language processing
+- Personalized travel insights
 
-## Get a fresh project
+### Notification System
 
-When you're ready, run:
+- Weather alerts and forecasts
+- Trip schedule reminders
+- Location-based updates
+- Customizable notification channels
+- Rich media support
+- Background task handling
 
-```bash
-npm run reset-project
-```
+### Trip Management
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+- Visual trip cards with real-time updates
+- Day-wise itinerary planning
+- Flight and hotel booking integration
+- Weather monitoring
+- Budget tracking
+- Photo-rich destination previews
 
-## Learn more
+### Smart Tools Integration
 
-To learn more about developing your project with Expo, look at the following resources:
+- Currency Converter
+  - Pattern recognition for currency mentions
+  - Real-time exchange rate fetching
+  - Interactive converter component
+  - Support for 10+ major currencies
+  - Automatic currency detection
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Chatbot Integration
 
-## Join the community
+### Real-time Chat Engine
 
-Join our community of developers creating universal apps.
+- Vercel AI SDK Implementation
+  - Live message streaming architecture
+  - Real-time response handling
+  - State management via useChat hook
+  - Bi-directional communication
+  - Error boundary handling
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Dynamic Tool Rendering
+
+- Smart Tool Detection
+  - Pattern-based recognition
+  - Natural language processing
+  - Context-aware tool activation
+  - Automated currency detection
+  - Tool state persistence
+
+### Interactive Components
+
+- Currency Converter Tool
+  - Live rate calculations
+  - Dynamic component rendering
+  - Real-time updates
+  - Interactive UI elements
+  - Seamless integration
+
+### User Experience
+
+- Advanced Chat Interface
+  - Modal-based presentation
+  - Message streaming display
+  - Loading state indicators
+  - Auto-scrolling messages
+  - Rich text formatting
+  - Tool visibility controls
+
+## Technology Stack
+
+### Core Platform
+
+- React Native 0.76.6
+- Expo SDK 52.0.27
+- Firebase 11.2.0
+- TypeScript
+
+### AI & Machine Learning
+
+- Google Generative AI
+- Vercel AI SDK (@ai-sdk/react)
+- Natural Language Processing
+- Contextual AI
+
+### Real-time Services
+
+- expo-location (v18.0.8)
+- expo-notifications (v0.29.14)
+- Firebase Realtime Database
+- Google Places API
+
+### Data Management
+
+- @react-native-async-storage
+- Firebase Firestore
+- Secure data encryption
+- Offline persistence
+
+### UI Framework
+
+- react-native-reanimated
+- expo-linear-gradient
+- Lottie animations
+- Custom UI components
+
+## Setup Requirements
+
+### Prerequisites
+
+- Node.js (Latest LTS)
+- Expo CLI
+- Firebase Account
+- Google Cloud Platform Account
+
+### Environment Variables
+
+Required configuration:
+
+- EXPO_PUBLIC_GOOGLE_MAP_KEY
+- EXPO_PUBLIC_WEATHER_API_KEY
+- EXPO_PUBLIC_GEMINI_API_KEY
+
+### Installation Process
+
+1. Repository Configuration
+2. Dependencies Installation
+3. Environment Setup
+4. Service Initialization
+
+## Project Architecture
+
+### Directory Structure
+
+- /app - Core application screens
+- /components - Reusable UI components
+- /configs - Service configurations
+- /context - State management
+- /services - External integrations
+- /lib - Utility functions
+
+### Key Features
+
+- Modular architecture
+- Component reusability
+- Clean code structure
+- Scalable design patterns
+
+## Development
+
+### Available Commands
+
+- npm start - Development server
+- npm run android - Android build
+- npm run ios - iOS build
+- npm run web - Web deployment
+
+## Security
+
+### Authentication
+
+- Firebase Authentication
+- Secure session management
+- Protected routes
+- Real-time validation
+
+### Data Protection
+
+- End-to-end encryption
+- Secure API communication
+- Token-based authentication
+- Data privacy compliance
+
+## License
+
+This project is licensed under the MIT License.
+
+## Support
+
+For technical support or feature requests, please submit an issue through our official repository.
