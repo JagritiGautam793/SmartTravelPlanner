@@ -46,7 +46,6 @@ Smart Travel Planner is a sophisticated mobile application that revolutionizes t
 
 - Visual trip cards with real-time updates
 - Day-wise itinerary planning
-- Flight and hotel booking integration
 - Weather monitoring
 - Budget tracking
 - Photo-rich destination previews
@@ -79,15 +78,6 @@ Smart Travel Planner is a sophisticated mobile application that revolutionizes t
   - Context-aware tool activation
   - Automated currency detection
   - Tool state persistence
-
-### Interactive Components
-
-- Currency Converter Tool
-  - Live rate calculations
-  - Dynamic component rendering
-  - Real-time updates
-  - Interactive UI elements
-  - Seamless integration
 
 ### User Experience
 
