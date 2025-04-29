@@ -1,4 +1,4 @@
-# Smart Travel Planner
+# TripForge
 
 ## Overview
 
